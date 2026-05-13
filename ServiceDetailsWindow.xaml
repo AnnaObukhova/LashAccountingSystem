@@ -1,0 +1,121 @@
+﻿<Window x:Class="LashAccountingSystem.ServiceDetailsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Информация об услуге" 
+        Height="450" Width="500"
+        Background="White"
+        FontFamily="Roboto"
+        Foreground="#3D5736"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <!-- Стиль для кнопки -->
+        <Style TargetType="Button">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="Width" Value="100"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="4" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Иконка и заголовок -->
+        <Border Grid.Row="0" 
+                Background="#FDF0F4" 
+                CornerRadius="30" 
+                Width="60" Height="60"
+                HorizontalAlignment="Center"
+                Margin="0,0,0,15">
+            <TextBlock Text="📋" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+
+        <TextBlock Grid.Row="1" 
+                   x:Name="ServiceNameText" 
+                   FontSize="22" 
+                   FontWeight="Bold" 
+                   Foreground="#3D5736"
+                   TextAlignment="Center"
+                   TextWrapping="Wrap"
+                   Margin="0,0,0,15"/>
+
+        <!-- Карточка с информацией -->
+        <Border Grid.Row="2" 
+                Background="#FDF0F4" 
+                CornerRadius="12" 
+                Padding="15" 
+                Margin="0,0,0,15"
+                BorderBrush="#D2D5AB"
+                BorderThickness="1">
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="134"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Цена:" FontWeight="Bold" FontSize="14" Foreground="#3D5736" Margin="5,5,5,5"/>
+                <TextBlock x:Name="ServicePriceText" Grid.Row="0" Grid.Column="1" FontSize="14" Foreground="#B35D6E" FontWeight="SemiBold" Margin="5,5,5,5"/>
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Длительность:" FontWeight="Bold" FontSize="14" Foreground="#3D5736" Margin="5,5,5,5"/>
+                <TextBlock x:Name="ServiceDurationText" Grid.Row="1" Grid.Column="1" FontSize="14" Foreground="#3D5736" Margin="5,5,5,5"/>
+            </Grid>
+        </Border>
+
+        <!-- Описание -->
+        <TextBlock Grid.Row="3" 
+                   Text="Описание" 
+                   FontSize="14" 
+                   FontWeight="Bold" 
+                   Foreground="#3D5736"
+                   Margin="0,0,0,10"/>
+
+        <Border Grid.Row="4" 
+                Background="#FDF0F4" 
+                CornerRadius="12" 
+                Padding="15" 
+                Margin="0,0,0,20"
+                BorderBrush="#D2D5AB"
+                BorderThickness="1">
+            <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto">
+                <TextBlock x:Name="ServiceDescriptionText" 
+                           FontSize="14" 
+                           Foreground="#3D5736"
+                           TextWrapping="Wrap"/>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Кнопка закрытия -->
+        <Button Grid.Row="5" 
+                Content="Закрыть" 
+                HorizontalAlignment="Center"
+                Background="#3D5736" 
+                Foreground="White" 
+                Click="CloseButton_Click"/>
+    </Grid>
+</Window>
