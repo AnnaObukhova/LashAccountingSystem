@@ -19,5 +19,7 @@ namespace LashAccountingSystem.Models
         public string? PaymentMethod { get; set; }   // может быть null
         public string? Notes { get; set; }           // может быть null
         public TimeSpan EndTime { get; set; }
+
+        public int DisplayOrder { get; set; }
     }
 }

@@ -94,7 +94,7 @@
 
                 <!-- Выбор даты через календарь -->
                 <TextBlock Text="Дата:" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,0,10,0" 
-                                FontWeight="Bold" Foreground="#3D5736" FontSize="16"/>
+                           FontWeight="Bold" Foreground="#3D5736" FontSize="16"/>
 
                 <DatePicker x:Name="FilterDatePicker" 
                             SelectedDate="{x:Static sys:DateTime.Today}"
@@ -103,7 +103,10 @@
                             Width="120"
                             Height="40"
                             FontSize="18"
-                            SelectedDateChanged="FilterDatePicker_SelectedDateChanged" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="0,0,0,5"/>
+                            SelectedDateChanged="FilterDatePicker_SelectedDateChanged" 
+                            VerticalContentAlignment="Center" 
+                            HorizontalContentAlignment="Center" 
+                            Margin="0,0,0,5"/>
 
                 <Button x:Name="FilterButton" Content="Показать" Width="80" Height="30" 
                         Margin="10,0,0,0" Background="#8F9964" Foreground="White" 
@@ -149,7 +152,7 @@
                     Click="PriceHistoryButton_Click"/>
         </StackPanel>
 
-        <!-- DataGrid без закруглений -->
+        <!-- DataGrid с порядковым номером вместо ID -->
         <Border Grid.Row="3" BorderBrush="#D2D5AB" BorderThickness="1" Background="White">
             <DataGrid x:Name="MyDataGrid" 
                       AutoGenerateColumns="False"
@@ -196,7 +199,8 @@
                 </DataGrid.Resources>
 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding AppointmentId}" Width="50">
+                    <!-- ПОРЯДКОВЫЙ НОМЕР (вместо ID) -->
+                    <DataGridTextColumn Header="№" Binding="{Binding DisplayOrder}" Width="45">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>

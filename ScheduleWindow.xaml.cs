@@ -41,44 +41,47 @@ namespace LashAccountingSystem
                 {
                     conn.Open();
                     string sql = @"
-                        SELECT 
-                            a.appointment_id,
-                            a.client_id,
-                            c.client_surname || ' ' || c.client_name as client_name,
-                            a.master_id,
-                            m.master_surname || ' ' || m.master_name as master_name,
-                            a.price_history_id,
-                            s.service_name,
-                            a.service_price,
-                            a.appointment_date,
-                            a.appointment_time,
-                            a.appointment_status,
-                            a.payment_status,
-                            a.payment_method,
-                            a.notes,
-                            s.service_duration
-                        FROM appointments a
-                        JOIN clients c ON a.client_id = c.client_id
-                        JOIN masters m ON a.master_id = m.master_id
-                        JOIN price_history ph ON a.price_history_id = ph.price_history_id
-                        JOIN services s ON ph.service_id = s.service_id
-                        WHERE a.appointment_date = @date
-                        ORDER BY a.appointment_time";
+                SELECT 
+                    a.appointment_id,
+                    a.client_id,
+                    c.client_surname || ' ' || c.client_name as client_name,
+                    a.master_id,
+                    m.master_surname || ' ' || m.master_name as master_name,
+                    a.price_history_id,
+                    s.service_name,
+                    a.service_price,
+                    a.appointment_date,
+                    a.appointment_time,
+                    a.appointment_status,
+                    a.payment_status,
+                    a.payment_method,
+                    a.notes,
+                    s.service_duration
+                FROM appointments a
+                JOIN clients c ON a.client_id = c.client_id
+                JOIN masters m ON a.master_id = m.master_id
+                JOIN price_history ph ON a.price_history_id = ph.price_history_id
+                JOIN services s ON ph.service_id = s.service_id
+                WHERE a.appointment_date = @date
+                ORDER BY a.appointment_time";
 
                     using (var cmd = new NpgsqlCommand(sql, conn))
                     {
                         cmd.Parameters.AddWithValue("@date", _currentFilterDate);
                         using (var reader = cmd.ExecuteReader())
                         {
+                            int order = 1; // Счётчик для порядкового номера
+
                             while (reader.Read())
                             {
                                 TimeSpan startTime = reader.GetTimeSpan(9);
-                                int durationMinutes = reader.GetInt32(14); // service_duration
+                                int durationMinutes = reader.GetInt32(14);
                                 TimeSpan endTime = startTime.Add(TimeSpan.FromMinutes(durationMinutes));
 
                                 appointments.Add(new Appointment
                                 {
                                     AppointmentId = reader.GetInt32(0),
+                                    DisplayOrder = order++, // Присваиваем номер
                                     ClientId = reader.GetInt32(1),
                                     ClientName = reader.GetString(2),
                                     MasterId = reader.GetInt32(3),
@@ -88,7 +91,7 @@ namespace LashAccountingSystem
                                     ServicePrice = reader.GetDecimal(7),
                                     AppointmentDate = reader.GetDateTime(8),
                                     AppointmentTime = startTime,
-                                    EndTime = endTime,  // <-- ДОБАВИТЬ
+                                    EndTime = endTime,
                                     AppointmentStatus = reader.GetString(10),
                                     PaymentStatus = reader.GetBoolean(11),
                                     PaymentMethod = reader.IsDBNull(12) ? null : reader.GetString(12),
@@ -103,7 +106,8 @@ namespace LashAccountingSystem
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка загрузки записей: {ex.Message}", "Ошибка");
+                MessageBox.Show($"Ошибка загрузки записей: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
