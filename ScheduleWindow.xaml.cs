@@ -20,10 +20,22 @@ namespace LashAccountingSystem
 
         public ScheduleWindow()
         {
-            InitializeComponent();
-            _currentFilterDate = DateTime.Today;
-            FilterDatePicker.SelectedDate = _currentFilterDate;
-            LoadAppointments();
+            try
+            {
+                InitializeComponent();
+                MessageBox.Show("ScheduleWindow: InitializeComponent выполнен");
+
+                _currentFilterDate = DateTime.Today;
+                FilterDatePicker.SelectedDate = _currentFilterDate;
+                LoadAppointments();
+
+                MessageBox.Show("ScheduleWindow: успешно загружен");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"ScheduleWindow ОШИБКА: {ex.Message}\n{ex.StackTrace}");
+                throw;
+            }
         }
 
         private void ScheduleWindow_Loaded(object sender, RoutedEventArgs e)
@@ -170,21 +182,92 @@ namespace LashAccountingSystem
         {
             if (MyDataGrid.SelectedItem is Appointment selectedAppointment)
             {
-                var result = MessageBox.Show($"Удалить запись?", "Подтверждение", MessageBoxButton.YesNo);
+                var result = MessageBox.Show($"Удалить запись {selectedAppointment.ClientName} на {selectedAppointment.AppointmentTime:hh\\:mm}?",
+                    "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
                 if (result == MessageBoxResult.Yes)
                 {
-                    using (var conn = DbConnection.GetConnection())
+                    try
                     {
-                        conn.Open();
-                        string sql = "DELETE FROM appointments WHERE appointment_id = @id";
-                        using (var cmd = new NpgsqlCommand(sql, conn))
+                        using (var conn = DbConnection.GetConnection())
                         {
-                            cmd.Parameters.AddWithValue("@id", selectedAppointment.AppointmentId);
-                            cmd.ExecuteNonQuery();
+                            conn.Open();
+
+                            // ============================================
+                            // ШАГ 1: ПОЛУЧАЕМ СПИСАННЫЕ МАТЕРИАЛЫ ДЛЯ ЭТОЙ ЗАПИСИ
+                            // ============================================
+                            string getMaterialsSql = @"
+                        SELECT material_id, material_consumption_amount
+                        FROM materials_consumption
+                        WHERE appointment_id = @appointmentId";
+
+                            var materialsToReturn = new List<(int materialId, decimal amount)>();
+
+                            using (var cmdGet = new NpgsqlCommand(getMaterialsSql, conn))
+                            {
+                                cmdGet.Parameters.AddWithValue("@appointmentId", selectedAppointment.AppointmentId);
+                                using (var reader = cmdGet.ExecuteReader())
+                                {
+                                    while (reader.Read())
+                                    {
+                                        materialsToReturn.Add((
+                                            materialId: reader.GetInt32(0),
+                                            amount: reader.GetDecimal(1)
+                                        ));
+                                    }
+                                }
+                            }
+
+                            // ============================================
+                            // ШАГ 2: УДАЛЯЕМ ЗАПИСЬ О РАСХОДЕ МАТЕРИАЛОВ
+                            // ============================================
+                            string deleteConsumptionSql = "DELETE FROM materials_consumption WHERE appointment_id = @appointmentId";
+                            using (var cmdDel = new NpgsqlCommand(deleteConsumptionSql, conn))
+                            {
+                                cmdDel.Parameters.AddWithValue("@appointmentId", selectedAppointment.AppointmentId);
+                                cmdDel.ExecuteNonQuery();
+                            }
+
+                            // ============================================
+                            // ШАГ 3: ВОЗВРАЩАЕМ МАТЕРИАЛЫ НА СКЛАД
+                            // ============================================
+                            foreach (var material in materialsToReturn)
+                            {
+                                string updateStockSql = "UPDATE materials SET material_stock = material_stock + @amount WHERE material_id = @materialId";
+                                using (var cmdUpdate = new NpgsqlCommand(updateStockSql, conn))
+                                {
+                                    cmdUpdate.Parameters.AddWithValue("@amount", material.amount);
+                                    cmdUpdate.Parameters.AddWithValue("@materialId", material.materialId);
+                                    cmdUpdate.ExecuteNonQuery();
+                                }
+                            }
+
+                            // ============================================
+                            // ШАГ 4: УДАЛЯЕМ САМУ ЗАПИСЬ
+                            // ============================================
+                            string deleteAppointmentSql = "DELETE FROM appointments WHERE appointment_id = @id";
+                            using (var cmdDel = new NpgsqlCommand(deleteAppointmentSql, conn))
+                            {
+                                cmdDel.Parameters.AddWithValue("@id", selectedAppointment.AppointmentId);
+                                cmdDel.ExecuteNonQuery();
+                            }
                         }
+
+                        LoadAppointments();
+                        MessageBox.Show("Запись удалена, материалы возвращены на склад!", "Успех",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
                     }
-                    LoadAppointments();
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ошибка при удалении: {ex.Message}", "Ошибка",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
+            }
+            else
+            {
+                MessageBox.Show("Выберите запись для удаления", "Внимание",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 

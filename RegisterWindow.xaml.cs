@@ -79,12 +79,12 @@ namespace LashAccountingSystem
                         cmd.Parameters.AddWithValue("@salt", salt);
                         cmd.Parameters.AddWithValue("@date", DateTime.Today);
                         cmd.Parameters.AddWithValue("@active", true);
+
                         cmd.ExecuteNonQuery();
                     }
                 }
 
-                MessageBox.Show("Регистрация успешна! Теперь вы можете войти.", "Успех",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Регистрация успешна!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                 DialogResult = true;
                 Close();
             }
@@ -100,12 +100,6 @@ namespace LashAccountingSystem
             Close();
         }
 
-        private void ShowError(string message)
-        {
-            ErrorText.Text = message;
-            ErrorBorder.Visibility = Visibility.Visible;
-        }
-
         private bool IsPasswordComplex(string password)
         {
             if (password.Length < 6) return false;
@@ -117,6 +111,12 @@ namespace LashAccountingSystem
                 if (char.IsLetter(c)) hasLetter = true;
             }
             return hasDigit && hasLetter;
+        }
+
+        private void ShowError(string message)
+        {
+            ErrorText.Text = message;
+            ErrorBorder.Visibility = Visibility.Visible;
         }
     }
 }

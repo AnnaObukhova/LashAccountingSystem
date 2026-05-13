@@ -40,21 +40,22 @@ namespace LashAccountingSystem
                         {
                             if (reader.Read())
                             {
+                                int userId = reader.GetInt32(0);
+                                string storedHash = reader.GetString(1);
+                                string salt = reader.GetString(2);
                                 bool isActive = reader.GetBoolean(3);
+
                                 if (!isActive)
                                 {
                                     ShowError("Учётная запись заблокирована!");
                                     return;
                                 }
 
-                                string storedHash = reader.GetString(1);
-                                string salt = reader.GetString(2);
-
                                 if (PasswordHasher.VerifyPassword(password, storedHash, salt))
                                 {
                                     App.CurrentUser = new User
                                     {
-                                        UserId = reader.GetInt32(0),
+                                        UserId = userId,
                                         Login = login,
                                         IsActive = isActive
                                     };
@@ -78,7 +79,7 @@ namespace LashAccountingSystem
             }
             catch (Exception ex)
             {
-                ShowError($"Ошибка подключения к базе данных: {ex.Message}");
+                ShowError($"Ошибка: {ex.Message}");
             }
         }
 

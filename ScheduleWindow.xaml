@@ -10,7 +10,7 @@
         WindowStartupLocation="CenterOwner"
         ResizeMode="CanResize"
         Loaded="ScheduleWindow_Loaded"
-        WindowState="Maximized">
+        WindowState="Normal">
 
     <Window.Resources>
         <!-- Стиль для всех кнопок с закруглёнными углами -->
