@@ -7,9 +7,7 @@
         Background="White"
         FontFamily="Roboto"
         Foreground="#4A6644"
-        WindowStartupLocation="CenterOwner"
-        ResizeMode="CanResize"
-        Loaded="ScheduleWindow_Loaded"
+        ResizeMode="CanResize"       
         WindowState="Normal">
 
     <Window.Resources>
@@ -41,13 +39,29 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Заголовок -->
-        <TextBlock Grid.Row="0" 
-                   Text="Расписание записей" 
-                   FontSize="22" 
-                   FontWeight="Bold" 
-                   Foreground="#3D5736"
-                   Margin="0,0,0,15"/>
+        <!-- Заголовок и кнопка Мастера -->
+        <Grid Grid.Row="0" Margin="0,0,0,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" 
+                       Text="Расписание записей" 
+                       FontSize="22" 
+                       FontWeight="Bold" 
+                       Foreground="#3D5736"
+                       VerticalAlignment="Center"/>
+
+            <Button x:Name="MastersButton" 
+                    Grid.Column="1"
+                    Content="👥 Мастера" 
+                    Width="100" Height="30"
+                    Background="#8F9964" 
+                    Foreground="White"
+                    Click="MastersButton_Click"
+                    ToolTip="Управление мастерами"/>
+        </Grid>
 
         <!-- Панель навигации по датам -->
         <Border Grid.Row="1" 

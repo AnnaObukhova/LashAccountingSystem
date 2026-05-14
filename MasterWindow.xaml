@@ -1,10 +1,10 @@
-﻿<Window x:Class="LashAccountingSystem.ServicesWindow"
+﻿<Window x:Class="LashAccountingSystem.MastersWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Управление услугами" 
-        Height="550" Width="800"
+        Title="Управление мастерами" 
+        Height="500" Width="750"
         Background="White"
-        FontFamily="Roboto"
+        FontFamily="Segoe UI"
         Foreground="#3D5736"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize">
@@ -28,7 +28,6 @@
             </Setter>
         </Style>
 
-        <!-- Стиль для TextBox -->
         <Style TargetType="TextBox">
             <Setter Property="Height" Value="35"/>
             <Setter Property="Padding" Value="8,5"/>
@@ -43,12 +42,13 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- Заголовок -->
         <TextBlock Grid.Row="0" 
-                   Text="Услуги мастера" 
+                   Text="👥 Управление мастерами" 
                    FontSize="22" 
                    FontWeight="Bold" 
                    Foreground="#3D5736"
@@ -57,7 +57,7 @@
 
         <!-- Кнопки управления -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10" HorizontalAlignment="Center">
-            <Button x:Name="AddButton" Content="➕ Добавить услугу" Width="140" Height="35" 
+            <Button x:Name="AddButton" Content="➕ Добавить мастера" Width="140" Height="35" 
                     Margin="0,0,10,0" Background="#3D5736" Foreground="White" 
                     Click="AddButton_Click"/>
             <Button x:Name="EditButton" Content="✏️ Редактировать" Width="120" Height="35" 
@@ -84,7 +84,7 @@
 
                 <TextBox x:Name="SearchTextBox" 
                          Width="250" 
-                         ToolTip="Введите название услуги"
+                         ToolTip="Введите фамилию, имя или телефон"
                          TextChanged="SearchTextBox_TextChanged"/>
 
                 <Button x:Name="ClearSearchButton" 
@@ -103,9 +103,9 @@
             </StackPanel>
         </Border>
 
-        <!-- Таблица услуг -->
+        <!-- Таблица мастеров -->
         <Border Grid.Row="3" BorderBrush="#D2D5AB" BorderThickness="1" Background="White">
-            <DataGrid x:Name="ServicesDataGrid" 
+            <DataGrid x:Name="MastersDataGrid" 
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
                       SelectionMode="Single"
@@ -121,7 +121,7 @@
                       CanUserDeleteRows="False"
                       CanUserResizeRows="False"
                       VerticalScrollBarVisibility="Auto"
-                      MouseDoubleClick="ServicesDataGrid_MouseDoubleClick">
+                      MouseDoubleClick="MastersDataGrid_MouseDoubleClick">
 
                 <DataGrid.Resources>
                     <Style TargetType="DataGridColumnHeader">
@@ -151,7 +151,7 @@
                 </DataGrid.Resources>
 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding ServiceId}" Width="50">
+                    <DataGridTextColumn Header="ID" Binding="{Binding MasterId}" Width="50">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -159,7 +159,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Название услуги" Binding="{Binding ServiceName}" Width="300">
+                    <DataGridTextColumn Header="Фамилия" Binding="{Binding MasterSurname}" Width="100">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Foreground" Value="#3D5736"/>
@@ -167,26 +167,54 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Длительность (мин)" Binding="{Binding ServiceDuration}" Width="150">
+                    <DataGridTextColumn Header="Имя" Binding="{Binding MasterName}" Width="100">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
-                                <Setter Property="HorizontalAlignment" Value="Center"/>
                                 <Setter Property="Foreground" Value="#3D5736"/>
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Цена (руб)" Binding="{Binding CurrentPrice, StringFormat={}{0:F2}}" Width="*">
+                    <DataGridTextColumn Header="Отчество" Binding="{Binding MasterPatronymic}" Width="100">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
-                                <Setter Property="HorizontalAlignment" Value="Right"/>
-                                <Setter Property="Foreground" Value="#B35D6E"/>
-                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="Foreground" Value="#3D5736"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Header="Телефон" Binding="{Binding MasterPhoneNumber}" Width="120">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#3D5736"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Header="Специализация" Binding="{Binding MasterSpecialization}" Width="120">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#3D5736"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Header="Номер договора" Binding="{Binding MasterContractNumber}" Width="*">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#3D5736"/>
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
+
+        <!-- Подсказка -->
+        <TextBlock Grid.Row="4" 
+                   Text="ℹ️ Двойной клик по строке - редактирование мастера" 
+                   FontSize="10" 
+                   Foreground="#999999" 
+                   Margin="5,10,0,0"/>
     </Grid>
 </Window>

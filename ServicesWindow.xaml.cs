@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using Npgsql;
 using LashAccountingSystem.Database;
@@ -9,19 +10,21 @@ namespace LashAccountingSystem
 {
     public partial class ServicesWindow : Window
     {
+        private List<Service> _allServices;
+        private List<Service> _filteredServices;
+
         public ServicesWindow()
         {
             InitializeComponent();
-            // Owner = Application.Current.MainWindow;
             LoadServices();
         }
 
-        private void LoadServices()
+        private void LoadServices(string searchText = "")
         {
-            List<Service> services = new List<Service>();
-
             try
             {
+                _allServices = new List<Service>();
+
                 using (var conn = DbConnection.GetConnection())
                 {
                     conn.Open();
@@ -47,7 +50,7 @@ namespace LashAccountingSystem
                     {
                         while (reader.Read())
                         {
-                            services.Add(new Service
+                            _allServices.Add(new Service
                             {
                                 ServiceId = reader.GetInt32(0),
                                 ServiceName = reader.GetString(1),
@@ -59,7 +62,7 @@ namespace LashAccountingSystem
                     }
                 }
 
-                ServicesDataGrid.ItemsSource = services;
+                ApplyFilter(searchText);
             }
             catch (Exception ex)
             {
@@ -68,12 +71,51 @@ namespace LashAccountingSystem
             }
         }
 
+        private void ApplyFilter(string searchText)
+        {
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                _filteredServices = _allServices;
+            }
+            else
+            {
+                string lowerSearch = searchText.ToLower();
+                _filteredServices = _allServices.Where(s =>
+                    (s.ServiceName?.ToLower().Contains(lowerSearch) ?? false) ||
+                    (s.ServiceDescription?.ToLower().Contains(lowerSearch) ?? false)
+                ).ToList();
+            }
+
+            ServicesDataGrid.ItemsSource = _filteredServices;
+
+            if (SearchResultCount != null)
+            {
+                SearchResultCount.Text = $"Найдено: {_filteredServices.Count} из {_allServices.Count}";
+            }
+        }
+
+        private void SearchTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            ApplyFilter(SearchTextBox?.Text ?? "");
+        }
+
+        private void ClearSearchButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (SearchTextBox != null)
+            {
+                SearchTextBox.Text = "";
+            }
+            ApplyFilter("");
+        }
+
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
             var addWindow = new AddServiceWindow();
             if (addWindow.ShowDialog() == true)
             {
-                LoadServices();
+                LoadServices(SearchTextBox?.Text ?? "");
+                MessageBox.Show("Услуга успешно добавлена!", "Успех",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -84,7 +126,7 @@ namespace LashAccountingSystem
                 var editWindow = new EditServiceWindow(selectedService);
                 if (editWindow.ShowDialog() == true)
                 {
-                    LoadServices();
+                    LoadServices(SearchTextBox?.Text ?? "");
                     MessageBox.Show("Услуга успешно обновлена!", "Успех",
                         MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -118,7 +160,7 @@ namespace LashAccountingSystem
                                 cmd.ExecuteNonQuery();
                             }
                         }
-                        LoadServices();
+                        LoadServices(SearchTextBox?.Text ?? "");
                         MessageBox.Show("Услуга удалена!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     catch (Exception ex)

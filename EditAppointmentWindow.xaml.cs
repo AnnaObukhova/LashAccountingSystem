@@ -296,6 +296,52 @@ namespace LashAccountingSystem
             bool paymentStatus = PaymentCheckBox.IsChecked ?? false;
             decimal price = decimal.Parse(PriceTextBox.Text);
 
+            // ============================================
+            // ПРОВЕРКА НАЛИЧИЯ МАТЕРИАЛОВ (только если статус меняется на "Запланирована")
+            // ============================================
+            // Если статус меняется на "Запланирована" или это новая запись, проверяем материалы
+            if (status == "Запланирована")
+            {
+                using (var conn = DbConnection.GetConnection())
+                {
+                    conn.Open();
+
+                    string checkMaterialsSql = @"
+                SELECT m.material_name, sm.quantity_required, m.material_stock
+                FROM service_materials sm
+                JOIN materials m ON sm.material_id = m.material_id
+                WHERE sm.service_id = @serviceId";
+
+                    List<string> missingMaterials = new List<string>();
+
+                    using (var cmdCheck = new NpgsqlCommand(checkMaterialsSql, conn))
+                    {
+                        cmdCheck.Parameters.AddWithValue("@serviceId", serviceId);
+                        using (var reader = cmdCheck.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                string materialName = reader.GetString(0);
+                                decimal required = reader.GetDecimal(1);
+                                decimal stock = reader.GetDecimal(2);
+
+                                if (stock < required)
+                                {
+                                    missingMaterials.Add($"{materialName} (нужно {required}, есть {stock})");
+                                }
+                            }
+                        }
+                    }
+
+                    if (missingMaterials.Count > 0)
+                    {
+                        MessageBox.Show($"Невозможно изменить статус на 'Запланирована'. Недостаточно материалов:\n{string.Join("\n", missingMaterials)}",
+                            "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+                }
+            }
+
             int priceHistoryId = _priceHistoryIds.ContainsKey(serviceId) ? _priceHistoryIds[serviceId] : 1;
 
             try
@@ -305,15 +351,15 @@ namespace LashAccountingSystem
                     conn.Open();
 
                     string sql = @"UPDATE appointments SET 
-                                  client_id = @clientId,
-                                  master_id = @masterId,
-                                  price_history_id = @priceHistoryId,
-                                  appointment_date = @date,
-                                  appointment_time = @time,
-                                  appointment_status = @status,
-                                  payment_status = @paymentStatus,
-                                  service_price = @price
-                                  WHERE appointment_id = @id";
+                          client_id = @clientId,
+                          master_id = @masterId,
+                          price_history_id = @priceHistoryId,
+                          appointment_date = @date,
+                          appointment_time = @time,
+                          appointment_status = @status,
+                          payment_status = @paymentStatus,
+                          service_price = @price
+                          WHERE appointment_id = @id";
 
                     using (var cmd = new NpgsqlCommand(sql, conn))
                     {
@@ -340,7 +386,6 @@ namespace LashAccountingSystem
                     "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;

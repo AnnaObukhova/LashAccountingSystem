@@ -6,7 +6,7 @@
         Background="White"
         FontFamily="Roboto"
         Foreground="#3D5736"
-        WindowStartupLocation="CenterOwner"
+        WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize">
 
     <Window.Resources>
@@ -28,10 +28,20 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- Стиль для TextBox -->
+        <Style TargetType="TextBox">
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="BorderBrush" Value="#D2D5AB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
     </Window.Resources>
 
     <Grid Margin="10">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -55,7 +65,7 @@
             <Button x:Name="EditButton" Content="✏️ Редактировать" Width="120" Height="35" 
                     Margin="0,0,10,0" Background="#8F9964" Foreground="White" 
                     Click="EditButton_Click"/>
-            <Button x:Name="DeleteButton" Content="Удалить" Width="100" Height="35" 
+            <Button x:Name="DeleteButton" Content="🗑 Удалить" Width="100" Height="35" 
                     Margin="0,0,10,0" Background="#B35D6E" Foreground="White" 
                     Click="DeleteButton_Click"/>
             <Button x:Name="RefreshButton" Content="🔄 Обновить остатки" Width="130" Height="35" 
@@ -63,8 +73,43 @@
                     Click="RefreshButton_Click"/>
         </StackPanel>
 
+        <!-- Панель поиска -->
+        <Border Grid.Row="2" 
+                Background="#FDF0F4" 
+                CornerRadius="8" 
+                Padding="10" 
+                Margin="0,0,0,10"
+                BorderBrush="#D7DAB3"
+                BorderThickness="1">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="🔍 Поиск:" 
+                           VerticalAlignment="Center" 
+                           FontWeight="Bold" 
+                           Margin="0,0,10,0"/>
+
+                <TextBox x:Name="SearchTextBox" 
+                         Width="549" 
+                         ToolTip="Введите наименование или производителя"
+                         TextChanged="SearchTextBox_TextChanged"/>
+
+                <Button x:Name="ClearSearchButton" 
+                        Content="✖ Очистить" 
+                        Width="80" 
+                        Margin="10,0,0,0"
+                        Background="#B35D6E" 
+                        Foreground="White"
+                        Click="ClearSearchButton_Click"/>
+
+                <TextBlock x:Name="SearchResultCount" 
+                           VerticalAlignment="Center" 
+                           Margin="15,0,0,0"
+                           Foreground="#8F9964"
+                           FontSize="12"/>
+            </StackPanel>
+        </Border>
+
         <!-- Таблица материалов -->
-        <Border Grid.Row="2" BorderBrush="#D2D5AB" BorderThickness="1" Background="White">
+        <Border Grid.Row="3" BorderBrush="#D2D5AB" BorderThickness="1" Background="White">
             <DataGrid x:Name="MaterialsDataGrid" 
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
@@ -183,7 +228,7 @@
         </Border>
 
         <!-- Подсказка -->
-        <TextBlock Grid.Row="3" 
+        <TextBlock Grid.Row="4" 
                    Text="ℹ️ При остатке 0 материал выделяется красным, при остатке ≤ 10 — оливковым" 
                    FontSize="10" 
                    Foreground="#999999" 

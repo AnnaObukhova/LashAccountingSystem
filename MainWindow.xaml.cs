@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using Npgsql;
 using LashAccountingSystem.Database;
@@ -9,18 +10,21 @@ namespace LashAccountingSystem
 {
     public partial class MainWindow : Window
     {
+        private List<Client> _allClients;
+        private List<Client> _filteredClients;
+
         public MainWindow()
         {
             InitializeComponent();
             LoadClients();
         }
 
-        private void LoadClients()
+        private void LoadClients(string searchText = "")
         {
-            List<Client> clients = new List<Client>();
-
             try
             {
+                _allClients = new List<Client>();
+
                 using (var conn = DbConnection.GetConnection())
                 {
                     conn.Open();
@@ -33,7 +37,7 @@ namespace LashAccountingSystem
                     {
                         while (reader.Read())
                         {
-                            clients.Add(new Client
+                            _allClients.Add(new Client
                             {
                                 ClientId = reader.GetInt32(0),
                                 ClientSurname = reader.GetString(1),
@@ -47,7 +51,7 @@ namespace LashAccountingSystem
                     }
                 }
 
-                ClientsDataGrid.ItemsSource = clients;
+                ApplyFilter(searchText);
             }
             catch (Exception ex)
             {
@@ -56,12 +60,52 @@ namespace LashAccountingSystem
             }
         }
 
+        private void ApplyFilter(string searchText)
+        {
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                _filteredClients = _allClients;
+            }
+            else
+            {
+                string lowerSearch = searchText.ToLower();
+                _filteredClients = _allClients.Where(c =>
+                    (c.ClientSurname?.ToLower().Contains(lowerSearch) ?? false) ||
+                    (c.ClientName?.ToLower().Contains(lowerSearch) ?? false) ||
+                    (c.ClientPatronymic?.ToLower().Contains(lowerSearch) ?? false) ||
+                    (c.ClientPhoneNumber?.Contains(lowerSearch) ?? false) ||
+                    (c.ClientEmail?.ToLower().Contains(lowerSearch) ?? false)
+                ).ToList();
+            }
+
+            ClientsDataGrid.ItemsSource = _filteredClients;
+
+            if (SearchResultCount != null)
+            {
+                SearchResultCount.Text = $"Найдено: {_filteredClients.Count} из {_allClients.Count}";
+            }
+        }
+
+        private void SearchTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            ApplyFilter(SearchTextBox?.Text ?? "");
+        }
+
+        private void ClearSearchButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (SearchTextBox != null)
+            {
+                SearchTextBox.Text = "";
+            }
+            ApplyFilter("");
+        }
+
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
             var addWindow = new AddClientWindow();
             if (addWindow.ShowDialog() == true)
             {
-                LoadClients();
+                LoadClients(SearchTextBox?.Text ?? "");
                 MessageBox.Show("Клиент успешно добавлен!", "Успех",
                     MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -74,7 +118,7 @@ namespace LashAccountingSystem
                 var editWindow = new EditClientWindow(selectedClient);
                 if (editWindow.ShowDialog() == true)
                 {
-                    LoadClients(); // обновляем список после редактирования
+                    LoadClients(SearchTextBox?.Text ?? "");
                     MessageBox.Show("Данные клиента успешно обновлены!", "Успех",
                         MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -107,7 +151,7 @@ namespace LashAccountingSystem
                                 cmd.ExecuteNonQuery();
                             }
                         }
-                        LoadClients();
+                        LoadClients(SearchTextBox?.Text ?? "");
                         MessageBox.Show("Клиент удален!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     catch (Exception ex)
@@ -122,7 +166,7 @@ namespace LashAccountingSystem
                 MessageBox.Show("Выберите клиента для удаления", "Внимание",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
             }
-        }        
+        }
 
         private void ClientsDataGrid_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {

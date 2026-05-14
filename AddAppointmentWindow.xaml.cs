@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Controls;
 using Npgsql;
 using LashAccountingSystem.Database;
-using System.Windows.Controls;
 
 namespace LashAccountingSystem
 {
@@ -21,53 +21,6 @@ namespace LashAccountingSystem
             LoadClients();
             LoadServices();
             LoadMasters();
-
-            // Добавляем обработчик для создания нового клиента
-            ClientComboBox.LostFocus += ClientComboBox_LostFocus;
-        }
-
-        private void ClientComboBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            string enteredText = ClientComboBox.Text;
-
-            // Если текст не пустой и не выбран существующий клиент
-            if (!string.IsNullOrWhiteSpace(enteredText) && ClientComboBox.SelectedItem == null)
-            {
-                var result = MessageBox.Show($"Клиент \"{enteredText}\" не найден.\n\nСоздать нового клиента с таким именем?",
-                    "Новый клиент", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.Yes)
-                {
-                    // Разбиваем введённый текст на фамилию и имя
-                    string[] parts = enteredText.Trim().Split(' ');
-                    string surname = parts.Length > 0 ? parts[0] : "";
-                    string name = parts.Length > 1 ? parts[1] : "";
-
-                    // Открываем окно добавления клиента
-                    var addClientWindow = new AddClientWindow();
-                    if (addClientWindow.ShowDialog() == true)
-                    {
-                        // Перезагружаем список клиентов и выбираем нового
-                        LoadClients();
-
-                        // Ищем созданного клиента
-                        foreach (var client in ClientComboBox.ItemsSource as IEnumerable<dynamic>)
-                        {
-                            if (client.DisplayName == enteredText ||
-                                (client.DisplayName.Contains(surname) && client.DisplayName.Contains(name)))
-                            {
-                                ClientComboBox.SelectedItem = client;
-                                break;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    ClientComboBox.Text = "";
-                    ClientComboBox.SelectedItem = null;
-                }
-            }
         }
 
         private void LoadClients()
@@ -167,7 +120,7 @@ namespace LashAccountingSystem
             }
         }
 
-        private void ServiceComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void ServiceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (ServiceComboBox.SelectedValue != null)
             {
@@ -181,7 +134,7 @@ namespace LashAccountingSystem
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            // Проверка обязательных полей
+            // Проверка обязательных полей (оставляем как есть)
             if (ClientComboBox.SelectedValue == null)
             {
                 MessageBox.Show("Выберите клиента!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -227,155 +180,172 @@ namespace LashAccountingSystem
             bool paymentStatus = PaymentCheckBox.IsChecked ?? false;
             string notes = NotesTextBox.Text.Trim();
 
-            try
+            // ============================================
+            // ШАГ 1: ПРОВЕРКА НАЛИЧИЯ МАТЕРИАЛОВ
+            // ============================================
+            List<string> missingMaterials = new List<string>();
+
+            using (var conn = DbConnection.GetConnection())
+            {
+                conn.Open();
+                string checkSql = @"
+            SELECT m.material_name, sm.quantity_required, m.material_stock
+            FROM service_materials sm
+            JOIN materials m ON sm.material_id = m.material_id
+            WHERE sm.service_id = @serviceId";
+
+                using (var cmd = new NpgsqlCommand(checkSql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@serviceId", serviceId);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string materialName = reader.GetString(0);
+                            decimal required = reader.GetDecimal(1);
+                            decimal stock = reader.GetDecimal(2);
+
+                            if (stock < required)
+                            {
+                                missingMaterials.Add($"{materialName} (нужно {required}, есть {stock})");
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (missingMaterials.Count > 0)
+            {
+                MessageBox.Show($"Невозможно создать запись. Недостаточно материалов:\n{string.Join("\n", missingMaterials)}",
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // ============================================
+            // ШАГ 2: ПОЛУЧЕНИЕ ЦЕНЫ
+            // ============================================
+            int priceHistoryId = 0;
+            decimal actualPrice = price;
+
+            using (var conn = DbConnection.GetConnection())
+            {
+                conn.Open();
+                string priceSql = @"SELECT price_history_id, price_history_price 
+                           FROM price_history 
+                           WHERE service_id = @serviceId 
+                           AND price_history_application_date <= @date 
+                           ORDER BY price_history_application_date DESC 
+                           LIMIT 1";
+
+                using (var cmd = new NpgsqlCommand(priceSql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@serviceId", serviceId);
+                    cmd.Parameters.AddWithValue("@date", date);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            priceHistoryId = reader.GetInt32(0);
+                            actualPrice = reader.GetDecimal(1);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Для выбранной услуги не установлена цена!", "Ошибка",
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            // ============================================
+            // ШАГ 3: СОЗДАНИЕ ЗАПИСИ
+            // ============================================
+            int newAppointmentId = 0;
+
+            using (var conn = DbConnection.GetConnection())
+            {
+                conn.Open();
+                string insertSql = @"INSERT INTO appointments 
+                            (client_id, master_id, price_history_id, appointment_date, appointment_time, 
+                             appointment_status, payment_status, service_price, notes)
+                            VALUES (@clientId, @masterId, @priceHistoryId, @date, @time, 
+                                    'Запланирована', @paymentStatus, @price, @notes)
+                            RETURNING appointment_id";
+
+                using (var cmd = new NpgsqlCommand(insertSql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@clientId", clientId);
+                    cmd.Parameters.AddWithValue("@masterId", masterId);
+                    cmd.Parameters.AddWithValue("@priceHistoryId", priceHistoryId);
+                    cmd.Parameters.AddWithValue("@date", date);
+                    cmd.Parameters.AddWithValue("@time", time);
+                    cmd.Parameters.AddWithValue("@paymentStatus", paymentStatus);
+                    cmd.Parameters.AddWithValue("@price", actualPrice);
+                    cmd.Parameters.AddWithValue("@notes", string.IsNullOrEmpty(notes) ? DBNull.Value : (object)notes);
+                    newAppointmentId = (int)cmd.ExecuteScalar();
+                }
+            }
+
+            // ============================================
+            // ШАГ 4: СПИСАНИЕ МАТЕРИАЛОВ
+            // ============================================
+            // Сначала получаем список материалов (отдельное подключение)
+            List<(int materialId, decimal quantity)> materialsToConsume = new List<(int, decimal)>();
+
+            using (var conn = DbConnection.GetConnection())
+            {
+                conn.Open();
+                string materialsSql = @"
+        SELECT material_id, quantity_required
+        FROM service_materials
+        WHERE service_id = @serviceId";
+
+                using (var cmd = new NpgsqlCommand(materialsSql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@serviceId", serviceId);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            materialsToConsume.Add((reader.GetInt32(0), reader.GetDecimal(1)));
+                        }
+                    }
+                }
+            }
+
+            // Теперь списываем материалы (отдельное подключение для каждой операции)
+            foreach (var material in materialsToConsume)
             {
                 using (var conn = DbConnection.GetConnection())
                 {
                     conn.Open();
 
-                    // ============================================
-                    // ШАГ 1: ПРОВЕРКА НАЛИЧИЯ МАТЕРИАЛОВ
-                    // ============================================
-                    string checkMaterialsSql = @"
-                SELECT m.material_name, sm.quantity_required, m.material_stock
-                FROM service_materials sm
-                JOIN materials m ON sm.material_id = m.material_id
-                WHERE sm.service_id = @serviceId";
-
-                    List<string> missingMaterials = new List<string>();
-
-                    using (var cmdCheck = new NpgsqlCommand(checkMaterialsSql, conn))
+                    // Обновляем остаток
+                    string updateSql = "UPDATE materials SET material_stock = material_stock - @qty WHERE material_id = @mid";
+                    using (var updateCmd = new NpgsqlCommand(updateSql, conn))
                     {
-                        cmdCheck.Parameters.AddWithValue("@serviceId", serviceId);
-                        using (var reader = cmdCheck.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                string materialName = reader.GetString(0);
-                                decimal required = reader.GetDecimal(1);
-                                decimal stock = reader.GetDecimal(2);
-
-                                if (stock < required)
-                                {
-                                    missingMaterials.Add($"{materialName} (нужно {required}, есть {stock})");
-                                }
-                            }
-                        }
+                        updateCmd.Parameters.AddWithValue("@qty", material.quantity);
+                        updateCmd.Parameters.AddWithValue("@mid", material.materialId);
+                        updateCmd.ExecuteNonQuery();
                     }
 
-                    if (missingMaterials.Count > 0)
+                    // Записываем расход
+                    string consumptionSql = @"INSERT INTO materials_consumption 
+                                  (appointment_id, material_id, material_consumption_amount) 
+                                  VALUES (@appointmentId, @mid, @qty)";
+                    using (var insertCmd = new NpgsqlCommand(consumptionSql, conn))
                     {
-                        MessageBox.Show($"Невозможно создать запись. Недостаточно материалов:\n{string.Join("\n", missingMaterials)}",
-                            "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
-                    }
-
-                    // ============================================
-                    // ШАГ 2: ПОЛУЧЕНИЕ АКТУАЛЬНОЙ ЦЕНЫ
-                    // ============================================
-                    string getPriceSql = @"SELECT price_history_id, price_history_price 
-                                  FROM price_history 
-                                  WHERE service_id = @serviceId 
-                                  AND price_history_application_date <= @date 
-                                  ORDER BY price_history_application_date DESC 
-                                  LIMIT 1";
-                    int priceHistoryId;
-                    using (var cmd = new NpgsqlCommand(getPriceSql, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@serviceId", serviceId);
-                        cmd.Parameters.AddWithValue("@date", date);
-                        using (var reader = cmd.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                priceHistoryId = reader.GetInt32(0);
-                                price = reader.GetDecimal(1);
-                            }
-                            else
-                            {
-                                MessageBox.Show("Для выбранной услуги не установлена цена!", "Ошибка",
-                                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                                return;
-                            }
-                        }
-                    }
-
-                    // ============================================
-                    // ШАГ 3: СОЗДАНИЕ ЗАПИСИ
-                    // ============================================
-                    string insertSql = @"INSERT INTO appointments 
-                                (client_id, master_id, price_history_id, appointment_date, appointment_time, 
-                                 appointment_status, payment_status, service_price, notes)
-                                VALUES (@clientId, @masterId, @priceHistoryId, @date, @time, 
-                                        'Запланирована', @paymentStatus, @price, @notes)
-                                RETURNING appointment_id";
-
-                    int newAppointmentId;
-                    using (var cmd = new NpgsqlCommand(insertSql, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@clientId", clientId);
-                        cmd.Parameters.AddWithValue("@masterId", masterId);
-                        cmd.Parameters.AddWithValue("@priceHistoryId", priceHistoryId);
-                        cmd.Parameters.AddWithValue("@date", date);
-                        cmd.Parameters.AddWithValue("@time", time);
-                        cmd.Parameters.AddWithValue("@paymentStatus", paymentStatus);
-                        cmd.Parameters.AddWithValue("@price", price);
-                        cmd.Parameters.AddWithValue("@notes", string.IsNullOrEmpty(notes) ? DBNull.Value : (object)notes);
-
-                        newAppointmentId = (int)cmd.ExecuteScalar();
-                    }
-
-                    // ============================================
-                    // ШАГ 4: СПИСАНИЕ МАТЕРИАЛОВ
-                    // ============================================
-                    string getMaterialsSql = @"
-                SELECT material_id, quantity_required
-                FROM service_materials
-                WHERE service_id = @serviceId";
-
-                    using (var cmdGet = new NpgsqlCommand(getMaterialsSql, conn))
-                    {
-                        cmdGet.Parameters.AddWithValue("@serviceId", serviceId);
-                        using (var reader = cmdGet.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                int materialId = reader.GetInt32(0);
-                                decimal required = reader.GetDecimal(1);
-
-                                // Обновляем остаток материала
-                                string updateStockSql = "UPDATE materials SET material_stock = material_stock - @qty WHERE material_id = @mid";
-                                using (var cmdUpdate = new NpgsqlCommand(updateStockSql, conn))
-                                {
-                                    cmdUpdate.Parameters.AddWithValue("@qty", required);
-                                    cmdUpdate.Parameters.AddWithValue("@mid", materialId);
-                                    cmdUpdate.ExecuteNonQuery();
-                                }
-
-                                // Записываем расход в materials_consumption
-                                string insertConsumptionSql = @"INSERT INTO materials_consumption 
-                            (appointment_id, material_id, material_consumption_amount) 
-                            VALUES (@appointmentId, @mid, @qty)";
-                                using (var cmdInsert = new NpgsqlCommand(insertConsumptionSql, conn))
-                                {
-                                    cmdInsert.Parameters.AddWithValue("@appointmentId", newAppointmentId);
-                                    cmdInsert.Parameters.AddWithValue("@mid", materialId);
-                                    cmdInsert.Parameters.AddWithValue("@qty", required);
-                                    cmdInsert.ExecuteNonQuery();
-                                }
-                            }
-                        }
+                        insertCmd.Parameters.AddWithValue("@appointmentId", newAppointmentId);
+                        insertCmd.Parameters.AddWithValue("@mid", material.materialId);
+                        insertCmd.Parameters.AddWithValue("@qty", material.quantity);
+                        insertCmd.ExecuteNonQuery();
                     }
                 }
+            }
 
-                DialogResult = true;
-                Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при сохранении записи:\n{ex.Message}",
-                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            DialogResult = true;
+            Close();
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)

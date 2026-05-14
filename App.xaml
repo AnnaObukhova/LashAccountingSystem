@@ -1,11 +1,9 @@
 ﻿<Application x:Class="LashAccountingSystem.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnMainWindowClose">
     <Application.Resources>
-        <Style TargetType="Window">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="FontFamily" Value="Roboto"/>
-            <Setter Property="Foreground" Value="#3D5736"/>
+        <Style TargetType="Window">            
         </Style>
     </Application.Resources>
 </Application>

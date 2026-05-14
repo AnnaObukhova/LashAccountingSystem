@@ -17,7 +17,6 @@ namespace LashAccountingSystem
         public AddServiceWindow()
         {
             InitializeComponent();
-            Owner = Application.Current.MainWindow;
             LoadMaterialsComboBox();
         }
 
@@ -40,7 +39,6 @@ namespace LashAccountingSystem
                             decimal stock = reader.GetDecimal(2);
                             materials.Add(new { MaterialId = id, DisplayName = $"{name} (остаток: {stock})" });
                         }
-                        // Сохраняем список материалов для выбора
                         App.Current.Resources["MaterialsList"] = materials;
                     }
                 }
@@ -81,6 +79,24 @@ namespace LashAccountingSystem
         {
             MaterialsDataGrid.ItemsSource = null;
             MaterialsDataGrid.ItemsSource = _tempMaterials;
+
+            // Обновляем текст подсказки о необходимости материалов
+            UpdateMaterialsRequiredHint();
+        }
+
+        private void UpdateMaterialsRequiredHint()
+        {
+            // Можно добавить визуальный индикатор, что материалы обязательны
+            if (MaterialsDataGrid.ItemsSource != null && MaterialsDataGrid.Items.Count == 0)
+            {
+                MaterialsBorder.BorderBrush = System.Windows.Media.Brushes.Red;
+                MaterialsBorder.BorderThickness = new Thickness(2);
+            }
+            else
+            {
+                MaterialsBorder.BorderBrush = (System.Windows.Media.Brush)System.Windows.Application.Current.Resources["#D2D5AB"];
+                MaterialsBorder.BorderThickness = new Thickness(1);
+            }
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
@@ -105,6 +121,26 @@ namespace LashAccountingSystem
                 MessageBox.Show("Введите корректную цену (положительное число)!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
                 PriceTextBox.Focus();
                 return;
+            }
+
+            // ========== НОВАЯ ПРОВЕРКА: обязательное наличие материалов ==========
+            if (_tempMaterials == null || _tempMaterials.Count == 0)
+            {
+                MessageBox.Show("❌ Добавьте хотя бы один материал для услуги!\n\n" +
+                    "Услуга не может существовать без необходимых материалов.",
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Проверка, что у каждого материала указано количество больше 0
+            foreach (var material in _tempMaterials)
+            {
+                if (material.QuantityRequired <= 0)
+                {
+                    MessageBox.Show($"❌ У материала '{material.MaterialName}' количество должно быть больше 0!",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
             }
 
             try

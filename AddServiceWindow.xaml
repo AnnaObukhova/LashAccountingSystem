@@ -117,7 +117,7 @@
                  VerticalScrollBarVisibility="Auto"/>
 
         <!-- Секция материалов -->
-        <Border Grid.Row="5" Grid.ColumnSpan="2" 
+        <Border x:Name="MaterialsBorder" Grid.Row="5" Grid.ColumnSpan="2" 
                 Background="#FDF0F4" 
                 CornerRadius="8" 
                 Padding="10" 

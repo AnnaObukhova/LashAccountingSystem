@@ -27,10 +27,20 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- Стиль для TextBox -->
+        <Style TargetType="TextBox">
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="BorderBrush" Value="#D2D5AB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
     </Window.Resources>
 
     <Grid Margin="10">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -45,7 +55,7 @@
                    Margin="0,0,0,15"
                    HorizontalAlignment="Center"/>
 
-        <!-- Кнопки управления -->
+        <!-- Кнопки управления (теперь сверху) -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10" HorizontalAlignment="Center">
             <Button x:Name="AddButton" Content="➕ Добавить клиента" Width="140" Height="35" 
                     Margin="0,0,10,0" Background="#3D5736" Foreground="White" 
@@ -55,13 +65,48 @@
                     Margin="0,0,10,0" Background="#8F9964" Foreground="White" 
                     Click="EditButton_Click"/>
 
-            <Button x:Name="DeleteButton" Content="Удалить" Width="100" Height="35" 
+            <Button x:Name="DeleteButton" Content="🗑 Удалить" Width="100" Height="35" 
                     Background="#B35D6E" Foreground="White" 
                     Click="DeleteButton_Click"/>
         </StackPanel>
 
+        <!-- Панель поиска (теперь под кнопками) -->
+        <Border Grid.Row="2" 
+                Background="#FDF0F4" 
+                CornerRadius="8" 
+                Padding="10" 
+                Margin="0,0,0,10"
+                BorderBrush="#D7DAB3"
+                BorderThickness="1">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="🔍 Поиск:" 
+                           VerticalAlignment="Center" 
+                           FontWeight="Bold" 
+                           Margin="0,0,10,0"/>
+
+                <TextBox x:Name="SearchTextBox" 
+                         Width="250" 
+                         ToolTip="Введите фамилию, имя или телефон"
+                         TextChanged="SearchTextBox_TextChanged"/>
+
+                <Button x:Name="ClearSearchButton" 
+                        Content="✖ Очистить" 
+                        Width="80" 
+                        Margin="10,0,0,0"
+                        Background="#B35D6E" 
+                        Foreground="White"
+                        Click="ClearSearchButton_Click"/>
+
+                <TextBlock x:Name="SearchResultCount" 
+                           VerticalAlignment="Center" 
+                           Margin="15,0,0,0"
+                           Foreground="#8F9964"
+                           FontSize="12"/>
+            </StackPanel>
+        </Border>
+
         <!-- Таблица клиентов с двойным кликом -->
-        <Border Grid.Row="2" BorderBrush="#D2D5AB" BorderThickness="1" Background="White">
+        <Border Grid.Row="3" BorderBrush="#D2D5AB" BorderThickness="1" Background="White">
             <DataGrid x:Name="ClientsDataGrid" 
                       AutoGenerateColumns="False"
                       IsReadOnly="True"

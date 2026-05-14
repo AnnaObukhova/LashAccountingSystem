@@ -23,17 +23,15 @@ namespace LashAccountingSystem
             try
             {
                 InitializeComponent();
-                MessageBox.Show("ScheduleWindow: InitializeComponent выполнен");
-
                 _currentFilterDate = DateTime.Today;
+                
                 FilterDatePicker.SelectedDate = _currentFilterDate;
-                LoadAppointments();
-
-                MessageBox.Show("ScheduleWindow: успешно загружен");
+                
+                LoadAppointments();                
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"ScheduleWindow ОШИБКА: {ex.Message}\n{ex.StackTrace}");
+                MessageBox.Show($"Ошибка в конструкторе ScheduleWindow: {ex.Message}\n{ex.StackTrace}");
                 throw;
             }
         }
@@ -420,6 +418,13 @@ namespace LashAccountingSystem
         {
             var priceHistoryWindow = new PriceHistoryWindow();
             priceHistoryWindow.ShowDialog();
-        }        
+        }
+
+        private void MastersButton_Click(object sender, RoutedEventArgs e)
+        {
+            var mastersWindow = new MastersWindow();
+            mastersWindow.Owner = this;
+            mastersWindow.ShowDialog();
+        }
     }
 }

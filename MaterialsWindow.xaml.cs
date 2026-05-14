@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using Npgsql;
 using LashAccountingSystem.Database;
@@ -9,19 +10,21 @@ namespace LashAccountingSystem
 {
     public partial class MaterialsWindow : Window
     {
+        private List<Material> _allMaterials;
+        private List<Material> _filteredMaterials;
+
         public MaterialsWindow()
         {
             InitializeComponent();
-            Owner = Application.Current.MainWindow;
             LoadMaterials();
         }
 
-        private void LoadMaterials()
+        private void LoadMaterials(string searchText = "")
         {
-            List<Material> materials = new List<Material>();
-
             try
             {
+                _allMaterials = new List<Material>();
+
                 using (var conn = DbConnection.GetConnection())
                 {
                     conn.Open();
@@ -34,7 +37,7 @@ namespace LashAccountingSystem
                     {
                         while (reader.Read())
                         {
-                            materials.Add(new Material
+                            _allMaterials.Add(new Material
                             {
                                 MaterialId = reader.GetInt32(0),
                                 MaterialName = reader.GetString(1),
@@ -47,7 +50,7 @@ namespace LashAccountingSystem
                     }
                 }
 
-                MaterialsDataGrid.ItemsSource = materials;
+                ApplyFilter(searchText);
             }
             catch (Exception ex)
             {
@@ -56,12 +59,51 @@ namespace LashAccountingSystem
             }
         }
 
+        private void ApplyFilter(string searchText)
+        {
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                _filteredMaterials = _allMaterials;
+            }
+            else
+            {
+                string lowerSearch = searchText.ToLower();
+                _filteredMaterials = _allMaterials.Where(m =>
+                    (m.MaterialName?.ToLower().Contains(lowerSearch) ?? false) ||
+                    (m.MaterialManufacturer?.ToLower().Contains(lowerSearch) ?? false)
+                ).ToList();
+            }
+
+            MaterialsDataGrid.ItemsSource = _filteredMaterials;
+
+            if (SearchResultCount != null)
+            {
+                SearchResultCount.Text = $"Найдено: {_filteredMaterials.Count} из {_allMaterials.Count}";
+            }
+        }
+
+        private void SearchTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            ApplyFilter(SearchTextBox?.Text ?? "");
+        }
+
+        private void ClearSearchButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (SearchTextBox != null)
+            {
+                SearchTextBox.Text = "";
+            }
+            ApplyFilter("");
+        }
+
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
             var addWindow = new AddMaterialWindow();
             if (addWindow.ShowDialog() == true)
             {
-                LoadMaterials();
+                LoadMaterials(SearchTextBox?.Text ?? "");
+                MessageBox.Show("Материал успешно добавлен!", "Успех",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -72,7 +114,7 @@ namespace LashAccountingSystem
                 var editWindow = new EditMaterialWindow(selectedMaterial);
                 if (editWindow.ShowDialog() == true)
                 {
-                    LoadMaterials();
+                    LoadMaterials(SearchTextBox?.Text ?? "");
                     MessageBox.Show("Материал успешно обновлён!", "Успех",
                         MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -106,7 +148,7 @@ namespace LashAccountingSystem
                                 cmd.ExecuteNonQuery();
                             }
                         }
-                        LoadMaterials();
+                        LoadMaterials(SearchTextBox?.Text ?? "");
                         MessageBox.Show("Материал удалён!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     catch (Exception ex)
@@ -125,7 +167,7 @@ namespace LashAccountingSystem
 
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            LoadMaterials();
+            LoadMaterials(SearchTextBox?.Text ?? "");
             MessageBox.Show("Список материалов обновлён!", "Обновление",
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }

@@ -1,5 +1,7 @@
-﻿using LashAccountingSystem.Models;
+﻿using System;
 using System.Windows;
+using LashAccountingSystem.Models;
+using Npgsql;
 
 namespace LashAccountingSystem
 {
@@ -11,21 +13,26 @@ namespace LashAccountingSystem
         {
             base.OnStartup(e);
 
-            var loginWindow = new LoginWindow();
+            // Глобальная обработка необработанных исключений
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            DispatcherUnhandledException += App_DispatcherUnhandledException;
 
-            if (loginWindow.ShowDialog() == true && loginWindow.IsLoggedIn)
-            {
-                var mainWindow = new ScheduleWindow();
-                MainWindow = mainWindow;
-                mainWindow.Show();
+            var mainWindow = new ScheduleWindow();
+            MainWindow = mainWindow;
+            mainWindow.Show();
+        }
 
-                // Отладочное сообщение
-                MessageBox.Show("Главное окно должно быть открыто");
-            }
-            else
-            {
-                Shutdown();
-            }
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            MessageBox.Show($"Критическая ошибка: {e.ExceptionObject}", "Ошибка",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            MessageBox.Show($"Ошибка: {e.Exception.Message}\n{e.Exception.StackTrace}", "Ошибка",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+            e.Handled = true;
         }
     }
 }
