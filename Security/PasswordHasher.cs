@@ -6,33 +6,34 @@ namespace LashAccountingSystem.Security
 {
     public static class PasswordHasher
     {
-        // Генерация соли
+        private const int SaltSize = 16; // 128 бит
+        private const int HashSize = 32; // 256 бит
+        private const int Iterations = 10000;
+
         public static string GenerateSalt()
         {
-            byte[] saltBytes = new byte[32];
             using (var rng = RandomNumberGenerator.Create())
             {
-                rng.GetBytes(saltBytes);
+                byte[] salt = new byte[SaltSize];
+                rng.GetBytes(salt);
+                return Convert.ToBase64String(salt);
             }
-            return Convert.ToBase64String(saltBytes);
         }
 
-        // Хеширование пароля с солью
         public static string HashPassword(string password, string salt)
         {
-            using (var sha256 = SHA256.Create())
+            byte[] saltBytes = Convert.FromBase64String(salt);
+            using (var pbkdf2 = new Rfc2898DeriveBytes(password, saltBytes, Iterations, HashAlgorithmName.SHA256))
             {
-                string saltedPassword = password + salt;
-                byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(saltedPassword));
-                return Convert.ToBase64String(bytes);
+                byte[] hash = pbkdf2.GetBytes(HashSize);
+                return Convert.ToBase64String(hash);
             }
         }
 
-        // Проверка пароля
-        public static bool VerifyPassword(string enteredPassword, string storedHash, string salt)
+        public static bool VerifyPassword(string password, string storedHash, string salt)
         {
-            string hashOfEntered = HashPassword(enteredPassword, salt);
-            return hashOfEntered == storedHash;
+            string computedHash = HashPassword(password, salt);
+            return computedHash == storedHash;
         }
     }
 }
