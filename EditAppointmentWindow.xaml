@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         Title="Редактирование записи" 
-        Height="650" Width="550"
+        Height="700" Width="550"
         Background="White"
         FontFamily="Roboto"
         Foreground="#3D5736"
@@ -11,7 +11,6 @@
         ResizeMode="NoResize">
 
     <Window.Resources>
-        <!-- Стиль для всех кнопок с закруглёнными углами -->
         <Style TargetType="Button">
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -30,7 +29,6 @@
             </Setter>
         </Style>
 
-        <!-- Стиль для TextBox -->
         <Style TargetType="TextBox">
             <Setter Property="BorderBrush" Value="#D2D5AB"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -40,13 +38,11 @@
             <Setter Property="Margin" Value="5"/>
         </Style>
 
-        <!-- Стиль для ReadOnly TextBox -->
         <Style TargetType="TextBox" x:Key="ReadOnlyTextBox" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="Background" Value="#FDF0F4"/>
             <Setter Property="IsReadOnly" Value="True"/>
         </Style>
 
-        <!-- Стиль для ComboBox -->
         <Style TargetType="ComboBox">
             <Setter Property="BorderBrush" Value="#D2D5AB"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -57,7 +53,6 @@
             <Setter Property="Height" Value="35"/>
         </Style>
 
-        <!-- Стиль для DatePicker -->
         <Style TargetType="DatePicker">
             <Setter Property="BorderBrush" Value="#D2D5AB"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -70,6 +65,8 @@
 
     <Grid Margin="15">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -227,8 +224,23 @@
             <ComboBoxItem Content="Не явка"/>
         </ComboBox>
 
-        <!-- Оплата -->
+        <!-- Примечания -->
         <TextBlock Grid.Row="9" Grid.Column="0" 
+                   Text="Примечания:" 
+                   VerticalAlignment="Top" 
+                   Margin="5"
+                   Foreground="#3D5736"
+                   FontSize="14"/>
+        <TextBox x:Name="NotesTextBox" 
+                 Grid.Row="9" Grid.Column="1" 
+                 Height="60" 
+                 Margin="5"
+                 TextWrapping="Wrap" 
+                 AcceptsReturn="True" 
+                 VerticalScrollBarVisibility="Auto"/>
+
+        <!-- Оплата -->
+        <TextBlock Grid.Row="10" Grid.Column="0" 
                    Text="Оплата:" 
                    VerticalAlignment="Center" 
                    Margin="5" 
@@ -236,14 +248,14 @@
                    Foreground="#3D5736"
                    FontSize="14"/>
         <CheckBox x:Name="PaymentCheckBox" 
-                  Grid.Row="9" Grid.Column="1" 
+                  Grid.Row="10" Grid.Column="1" 
                   Margin="5" 
                   Content="Оплачено"
                   VerticalAlignment="Center"
                   Foreground="#3D5736"/>
 
         <!-- Кнопки -->
-        <StackPanel Grid.Row="10" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,10">
+        <StackPanel Grid.Row="11" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,10">
             <Button x:Name="SaveButton" Content="💾 Сохранить" Width="100" Height="35" Margin="10" 
                     Background="#3D5736" Foreground="White" 
                     Click="SaveButton_Click"/>

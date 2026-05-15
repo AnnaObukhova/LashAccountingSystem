@@ -39,28 +39,37 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Заголовок и кнопка Мастера -->
+        <!-- Заголовок и кнопки управления -->
         <Grid Grid.Row="0" Margin="0,0,0,15">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Column="0" 
-                       Text="Расписание записей" 
-                       FontSize="22" 
-                       FontWeight="Bold" 
-                       Foreground="#3D5736"
-                       VerticalAlignment="Center"/>
+               Text="Расписание записей" 
+               FontSize="22" 
+               FontWeight="Bold" 
+               Foreground="#3D5736"
+               VerticalAlignment="Center"/>
+
+            <Button x:Name="BackupButton"
+            Content="💾 Резервное копирование" Height="30"
+            Background="#3D5736" 
+            Foreground="White"
+            Click="BackupButton_Click"
+            ToolTip="Резервное копирование базы данных"
+            Margin="898,0,10,0" Grid.ColumnSpan="2"/>
 
             <Button x:Name="MastersButton" 
-                    Grid.Column="1"
-                    Content="👥 Мастера" 
-                    Width="100" Height="30"
-                    Background="#8F9964" 
-                    Foreground="White"
-                    Click="MastersButton_Click"
-                    ToolTip="Управление мастерами"/>
+            Grid.Column="2"
+            Content="👥 Мастера" 
+            Width="100" Height="30"
+            Background="#8F9964" 
+            Foreground="White"
+            Click="MastersButton_Click"
+            ToolTip="Управление мастерами"/>
         </Grid>
 
         <!-- Панель навигации по датам -->
@@ -122,10 +131,6 @@
                             HorizontalContentAlignment="Center" 
                             Margin="0,0,0,5"/>
 
-                <Button x:Name="FilterButton" Content="Показать" Width="80" Height="30" 
-                        Margin="10,0,0,0" Background="#8F9964" Foreground="White" 
-                        Click="FilterButton_Click"/>
-
                 <Button x:Name="TodayButton" Content="Сегодня" Width="80" Height="30" 
                         Margin="10,0,0,0" Background="#B35D6E" Foreground="White" 
                         Click="TodayButton_Click"/>
@@ -158,19 +163,6 @@
             <Button x:Name="MaterialsButton" Content="Материалы" Width="110" Height="35" 
                     Background="#8F9964" Foreground="White" 
                     Click="MaterialsButton_Click"/>
-            <Button x:Name="MaterialConsumptionButton" Content="Расход материалов" Width="140" Height="35" 
-                    Margin="10,0,0,0" Background="#B35D6E" Foreground="White" 
-                    Click="MaterialConsumptionButton_Click"/>
-            <Button x:Name="PriceHistoryButton" Content="История цен" Width="120" Height="35" 
-                    Margin="10,0,0,0" Background="#3D5736" Foreground="White" 
-                    Click="PriceHistoryButton_Click"/>
-            <Button x:Name="BackupButton" 
-        Content="💾 Резервное копирование" 
-        Width="150" Height="35"
-        Background="#3D5736" 
-        Foreground="White"
-        Click="BackupButton_Click"
-        Margin="10,0,0,0"/>
         </StackPanel>
 
         <!-- DataGrid с порядковым номером вместо ID -->

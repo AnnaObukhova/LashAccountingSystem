@@ -66,6 +66,13 @@
             <Button x:Name="DeleteButton" Content="🗑 Удалить" Width="100" Height="35" 
                     Background="#B35D6E" Foreground="White" 
                     Click="DeleteButton_Click"/>
+            <Button x:Name="PriceHistoryButton" 
+                    Content="📜 История цен" 
+                    Width="120" Height="35"
+                    Margin="10,0,0,0"
+                    Background="#3D5736" 
+                    Foreground="White" 
+                    Click="PriceHistoryButton_Click"/>
         </StackPanel>
 
         <!-- Панель поиска -->

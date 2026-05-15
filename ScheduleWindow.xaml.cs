@@ -119,16 +119,7 @@ namespace LashAccountingSystem
                 MessageBox.Show($"Ошибка загрузки записей: {ex.Message}", "Ошибка",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-
-        private void FilterButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (FilterDatePicker.SelectedDate.HasValue)
-            {
-                _currentFilterDate = FilterDatePicker.SelectedDate.Value;
-                LoadAppointments();
-            }
-        }
+        }        
 
         private void TodayButton_Click(object sender, RoutedEventArgs e)
         {
@@ -406,18 +397,6 @@ namespace LashAccountingSystem
                 FilterDatePicker.SelectedDate = _currentFilterDate;
                 LoadAppointments();
             }
-        }
-
-        private void MaterialConsumptionButton_Click(object sender, RoutedEventArgs e)
-        {
-            var consumptionWindow = new MaterialConsumptionWindow();
-            consumptionWindow.ShowDialog();
-        }
-
-        private void PriceHistoryButton_Click(object sender, RoutedEventArgs e)
-        {
-            var priceHistoryWindow = new PriceHistoryWindow();
-            priceHistoryWindow.ShowDialog();
         }
 
         private void MastersButton_Click(object sender, RoutedEventArgs e)

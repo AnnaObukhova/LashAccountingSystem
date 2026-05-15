@@ -190,6 +190,8 @@ namespace LashAccountingSystem
             }
 
             PaymentCheckBox.IsChecked = _appointment.PaymentStatus;
+
+            NotesTextBox.Text = _appointment.Notes ?? "";
         }
 
         private void ClientComboBox_LostFocus(object sender, RoutedEventArgs e)
@@ -295,6 +297,7 @@ namespace LashAccountingSystem
             string status = (StatusComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "Запланирована";
             bool paymentStatus = PaymentCheckBox.IsChecked ?? false;
             decimal price = decimal.Parse(PriceTextBox.Text);
+            string notes = NotesTextBox.Text.Trim();
 
             // ============================================
             // ПРОВЕРКА НАЛИЧИЯ МАТЕРИАЛОВ (только если статус меняется на "Запланирована")
@@ -351,15 +354,16 @@ namespace LashAccountingSystem
                     conn.Open();
 
                     string sql = @"UPDATE appointments SET 
-                          client_id = @clientId,
-                          master_id = @masterId,
-                          price_history_id = @priceHistoryId,
-                          appointment_date = @date,
-                          appointment_time = @time,
-                          appointment_status = @status,
-                          payment_status = @paymentStatus,
-                          service_price = @price
-                          WHERE appointment_id = @id";
+                                  client_id = @clientId,
+                                  master_id = @masterId,
+                                  price_history_id = @priceHistoryId,
+                                  appointment_date = @date,
+                                  appointment_time = @time,
+                                  appointment_status = @status,
+                                  payment_status = @paymentStatus,
+                                  service_price = @price,
+                                  notes = @notes
+                                  WHERE appointment_id = @id";
 
                     using (var cmd = new NpgsqlCommand(sql, conn))
                     {
@@ -372,6 +376,7 @@ namespace LashAccountingSystem
                         cmd.Parameters.AddWithValue("@status", status);
                         cmd.Parameters.AddWithValue("@paymentStatus", paymentStatus);
                         cmd.Parameters.AddWithValue("@price", price);
+                        cmd.Parameters.AddWithValue("@notes", string.IsNullOrEmpty(notes) ? DBNull.Value : (object)notes);
 
                         cmd.ExecuteNonQuery();
                     }

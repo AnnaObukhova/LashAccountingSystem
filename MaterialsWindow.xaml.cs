@@ -194,5 +194,12 @@ namespace LashAccountingSystem
                     MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
+
+        private void MaterialConsumptionButton_Click(object sender, RoutedEventArgs e)
+        {
+            var consumptionWindow = new MaterialConsumptionWindow();
+            consumptionWindow.Owner = this;
+            consumptionWindow.ShowDialog();
+        }
     }
 }

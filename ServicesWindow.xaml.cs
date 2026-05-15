@@ -185,5 +185,12 @@ namespace LashAccountingSystem
                 detailsWindow.ShowDialog();
             }
         }
+
+        private void PriceHistoryButton_Click(object sender, RoutedEventArgs e)
+        {
+            var priceHistoryWindow = new PriceHistoryWindow();
+            priceHistoryWindow.Owner = this;
+            priceHistoryWindow.ShowDialog();
+        }
     }
 }

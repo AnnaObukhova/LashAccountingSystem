@@ -81,6 +81,15 @@
             Click="IncomingButton_Click"
             Margin="10,0,0,0"/>
 
+            <!-- НОВАЯ КНОПКА РАСХОДА МАТЕРИАЛОВ -->
+            <Button x:Name="MaterialConsumptionButton" 
+            Content="📋 Расход материалов" 
+            Width="140" Height="35"
+            Background="#B35D6E" 
+            Foreground="White"
+            Click="MaterialConsumptionButton_Click"
+            Margin="10,0,0,0"/>
+
             <Button x:Name="MaterialReportButton" 
             Content="📊 Отчёт по расходу" 
             Width="130" Height="35"
