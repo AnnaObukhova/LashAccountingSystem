@@ -6,6 +6,14 @@ using System.Windows;
 using Npgsql;
 using LashAccountingSystem.Database;
 using LashAccountingSystem.Models;
+using System.IO;
+using iText.Kernel.Pdf;
+using iText.Layout;
+using iText.Layout.Element;
+using iText.Layout.Properties;
+using iText.Kernel.Font;
+using iText.IO.Font.Constants;
+using PdfAlignment = iText.Layout.Properties.TextAlignment;
 
 namespace LashAccountingSystem
 {
@@ -170,6 +178,120 @@ namespace LashAccountingSystem
 
                 MessageBox.Show($"✅ Отчёт экспортирован!\n\n📁 {filePath}", "Успех",
                     MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка экспорта: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void ExportPdfButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_reportData == null || _reportData.Count == 0)
+            {
+                MessageBox.Show("Нет данных для экспорта!", "Внимание",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                // Сохраняем временный HTML файл
+                string tempHtml = Path.GetTempFileName() + ".html";
+                string pdfPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    $"Отчет_по_материалам_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
+
+                // Создаём HTML содержимое
+                var htmlBuilder = new System.Text.StringBuilder();
+                htmlBuilder.AppendLine("<!DOCTYPE html>");
+                htmlBuilder.AppendLine("<html>");
+                htmlBuilder.AppendLine("<head>");
+                htmlBuilder.AppendLine("<meta charset='UTF-8'>");
+                htmlBuilder.AppendLine("<style>");
+                htmlBuilder.AppendLine("body { font-family: 'Segoe UI', Arial, sans-serif; margin: 20px; }");
+                htmlBuilder.AppendLine("h1 { color: #3D5736; text-align: center; }");
+                htmlBuilder.AppendLine("h3 { text-align: center; color: #666; }");
+                htmlBuilder.AppendLine("table { border-collapse: collapse; width: 100%; margin-top: 20px; }");
+                htmlBuilder.AppendLine("th { background-color: #FDF0F4; border: 1px solid #D2D5AB; padding: 8px; text-align: center; }");
+                htmlBuilder.AppendLine("td { border: 1px solid #D2D5AB; padding: 6px; }");
+                htmlBuilder.AppendLine(".right { text-align: right; }");
+                htmlBuilder.AppendLine(".center { text-align: center; }");
+                htmlBuilder.AppendLine(".total { font-weight: bold; margin-top: 20px; }");
+                htmlBuilder.AppendLine(".footer { font-size: 10px; text-align: center; margin-top: 30px; color: #999; }");
+                htmlBuilder.AppendLine("</style>");
+                htmlBuilder.AppendLine("</head>");
+                htmlBuilder.AppendLine("<body>");
+
+                // Заголовок
+                htmlBuilder.AppendLine($"<h1>Отчёт по расходу материалов</h1>");
+                htmlBuilder.AppendLine($"<h3>Период: {StartDatePicker.SelectedDate:dd.MM.yyyy} - {EndDatePicker.SelectedDate:dd.MM.yyyy}</h3>");
+
+                // Таблица
+                htmlBuilder.AppendLine("<table>");
+                htmlBuilder.AppendLine("<tr>");
+                htmlBuilder.AppendLine("<th>Материал</th>");
+                htmlBuilder.AppendLine("<th>Производитель</th>");
+                htmlBuilder.AppendLine("<th>Расход (ед.)</th>");
+                htmlBuilder.AppendLine("<th>Цена продажи</th>");
+                htmlBuilder.AppendLine("<th>Последний приход</th>");
+                htmlBuilder.AppendLine("<th>Поставщик</th>");
+                htmlBuilder.AppendLine("<th>Цена закупки</th>");
+                htmlBuilder.AppendLine("<th>Остаток</th>");
+                htmlBuilder.AppendLine("<th>Общая стоимость</th>");
+                htmlBuilder.AppendLine("<th>Кол-во записей</th>");
+                htmlBuilder.AppendLine("</tr>");
+
+                decimal totalCostSum = 0;
+                decimal totalQuantitySum = 0;
+
+                foreach (var item in _reportData)
+                {
+                    totalQuantitySum += item.TotalQuantity;
+                    totalCostSum += item.TotalCost;
+
+                    htmlBuilder.AppendLine("<tr>");
+                    htmlBuilder.AppendLine($"<td>{System.Security.SecurityElement.Escape(item.MaterialName ?? "")}</td>");
+                    htmlBuilder.AppendLine($"<td>{System.Security.SecurityElement.Escape(item.Manufacturer ?? "-")}</td>");
+                    htmlBuilder.AppendLine($"<td class='right'>{item.TotalQuantity:F2}</td>");
+                    htmlBuilder.AppendLine($"<td class='right'>{item.Price:F2}</td>");
+                    htmlBuilder.AppendLine($"<td class='center'>{item.LastIncomingDate?.ToString("dd.MM.yyyy") ?? "-"}</td>");
+                    htmlBuilder.AppendLine($"<td>{System.Security.SecurityElement.Escape(item.LastSupplier ?? "-")}</td>");
+                    htmlBuilder.AppendLine($"<td class='right'>{item.LastIncomingPrice?.ToString("F2") ?? "-"}</td>");
+                    htmlBuilder.AppendLine($"<td class='right'>{item.CurrentStock:F2}</td>");
+                    htmlBuilder.AppendLine($"<td class='right'>{item.TotalCost:F2}</td>");
+                    htmlBuilder.AppendLine($"<td class='center'>{item.AppointmentCount}</td>");
+                    htmlBuilder.AppendLine("</tr>");
+                }
+
+                htmlBuilder.AppendLine("</table>");
+
+                // Итоги
+                htmlBuilder.AppendLine($"<p class='total'>Всего материалов в отчёте: {_reportData.Count}</p>");
+                htmlBuilder.AppendLine($"<p class='total'>Общий расход: {totalQuantitySum:F2} ед.</p>");
+                htmlBuilder.AppendLine($"<p class='total'>Общая стоимость: {totalCostSum:F2} руб.</p>");
+
+                // Подвал
+                htmlBuilder.AppendLine($"<p class='footer'>Дата создания отчёта: {DateTime.Now:dd.MM.yyyy HH:mm:ss}</p>");
+
+                htmlBuilder.AppendLine("</body>");
+                htmlBuilder.AppendLine("</html>");
+
+                File.WriteAllText(tempHtml, htmlBuilder.ToString(), Encoding.UTF8);
+
+                // Открываем HTML в браузере и печатаем в PDF
+                using (var process = new System.Diagnostics.Process())
+                {
+                    process.StartInfo.FileName = tempHtml;
+                    process.StartInfo.UseShellExecute = true;
+                    process.Start();
+                }
+
+                MessageBox.Show($"✅ HTML отчёт создан!\n\n" +
+                    $"Файл открыт в браузере.\n" +
+                    $"Нажмите Ctrl+P и выберите 'Microsoft Print to PDF' для сохранения.\n\n" +
+                    $"Или файл сохранён по пути:\n{tempHtml}",
+                    "Экспорт в PDF", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {

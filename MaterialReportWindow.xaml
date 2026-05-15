@@ -87,6 +87,13 @@
                         Background="#8F9964" 
                         Foreground="White"
                         Click="ExportCsvButton_Click"/>
+                <Button x:Name="ExportPdfButton" 
+                        Content="📄 Экспорт в PDF" 
+                        Width="120" 
+                        Margin="10,0,0,0"
+                        Background="#B35D6E" 
+                        Foreground="White"
+                        Click="ExportPdfButton_Click"/>
             </StackPanel>
         </Border>
 
