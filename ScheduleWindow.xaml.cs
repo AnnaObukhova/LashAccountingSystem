@@ -426,5 +426,12 @@ namespace LashAccountingSystem
             mastersWindow.Owner = this;
             mastersWindow.ShowDialog();
         }
+
+        private void BackupButton_Click(object sender, RoutedEventArgs e)
+        {
+            var backupWindow = new BackupWindow();
+            backupWindow.Owner = this;
+            backupWindow.ShowDialog();
+        }
     }
 }

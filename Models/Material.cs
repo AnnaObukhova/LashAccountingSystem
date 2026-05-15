@@ -1,4 +1,6 @@
-﻿namespace LashAccountingSystem.Models
+﻿using System;
+
+namespace LashAccountingSystem.Models
 {
     public class Material
     {
@@ -8,5 +10,11 @@
         public decimal MaterialPrice { get; set; }
         public string MaterialContraindications { get; set; }
         public decimal MaterialStock { get; set; }
+
+        // Новые поля для истории прихода
+        public DateTime? LastIncomingDate { get; set; }
+        public string LastSupplier { get; set; }
+        public decimal? LastIncomingQuantity { get; set; }
+        public decimal? LastIncomingPrice { get; set; }
     }
 }

@@ -164,6 +164,13 @@
             <Button x:Name="PriceHistoryButton" Content="История цен" Width="120" Height="35" 
                     Margin="10,0,0,0" Background="#3D5736" Foreground="White" 
                     Click="PriceHistoryButton_Click"/>
+            <Button x:Name="BackupButton" 
+        Content="💾 Резервное копирование" 
+        Width="150" Height="35"
+        Background="#3D5736" 
+        Foreground="White"
+        Click="BackupButton_Click"
+        Margin="10,0,0,0"/>
         </StackPanel>
 
         <!-- DataGrid с порядковым номером вместо ID -->

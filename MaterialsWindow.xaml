@@ -60,17 +60,34 @@
         <!-- Кнопки управления -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10" HorizontalAlignment="Center">
             <Button x:Name="AddButton" Content="➕ Добавить материал" Width="150" Height="35" 
-                    Margin="0,0,10,0" Background="#3D5736" Foreground="White" 
-                    Click="AddButton_Click"/>
+            Margin="0,0,10,0" Background="#3D5736" Foreground="White" 
+            Click="AddButton_Click"/>
             <Button x:Name="EditButton" Content="✏️ Редактировать" Width="120" Height="35" 
-                    Margin="0,0,10,0" Background="#8F9964" Foreground="White" 
-                    Click="EditButton_Click"/>
+            Margin="0,0,10,0" Background="#8F9964" Foreground="White" 
+            Click="EditButton_Click"/>
             <Button x:Name="DeleteButton" Content="🗑 Удалить" Width="100" Height="35" 
-                    Margin="0,0,10,0" Background="#B35D6E" Foreground="White" 
-                    Click="DeleteButton_Click"/>
+            Margin="0,0,10,0" Background="#B35D6E" Foreground="White" 
+            Click="DeleteButton_Click"/>
             <Button x:Name="RefreshButton" Content="🔄 Обновить остатки" Width="130" Height="35" 
-                    Background="#8F9964" Foreground="White" 
-                    Click="RefreshButton_Click"/>
+            Background="#8F9964" Foreground="White" 
+            Click="RefreshButton_Click"/>
+
+            <!-- НОВАЯ КНОПКА ПОПОЛНЕНИЯ -->
+            <Button x:Name="IncomingButton" 
+            Content="📦 Пополнение" 
+            Width="120" Height="35"
+            Background="#3D5736" 
+            Foreground="White"
+            Click="IncomingButton_Click"
+            Margin="10,0,0,0"/>
+
+            <Button x:Name="MaterialReportButton" 
+            Content="📊 Отчёт по расходу" 
+            Width="130" Height="35"
+            Background="#8F9964" 
+            Foreground="White"
+            Click="MaterialReportButton_Click"
+            Margin="10,0,0,0"/>
         </StackPanel>
 
         <!-- Панель поиска -->
@@ -213,6 +230,12 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
+                    <DataGridTextColumn Header="Последний приход" Binding="{Binding LastIncomingDate, StringFormat={}{0:dd.MM.yyyy}}" Width="100"/>
+                    <DataGridTextColumn Header="Поставщик" Binding="{Binding LastSupplier}" Width="120"/>
+                    <DataGridTextColumn Header="Кол-во прихода" Binding="{Binding LastIncomingQuantity, StringFormat={}{0:F2}}" Width="90"/>
+                    <DataGridTextColumn Header="Цена закупки" Binding="{Binding LastIncomingPrice, StringFormat={}{0:F2}}" Width="90"/>
+
+                    
                     <!-- Противопоказания (растягивается) -->
                     <DataGridTextColumn Header="Противопоказания" Binding="{Binding MaterialContraindications}" Width="*">
                         <DataGridTextColumn.ElementStyle>

@@ -28,9 +28,10 @@ namespace LashAccountingSystem
                 using (var conn = DbConnection.GetConnection())
                 {
                     conn.Open();
-                    string sql = "SELECT material_id, material_name, material_manufacturer, " +
-                                 "material_price, material_contraindications, material_stock " +
-                                 "FROM materials ORDER BY material_name;";
+                    string sql = @"SELECT material_id, material_name, material_manufacturer, 
+                                  material_price, material_contraindications, material_stock,
+                                  last_incoming_date, last_supplier, last_incoming_quantity, last_incoming_price
+                           FROM materials ORDER BY material_name;";
 
                     using (var cmd = new NpgsqlCommand(sql, conn))
                     using (var reader = cmd.ExecuteReader())
@@ -44,7 +45,12 @@ namespace LashAccountingSystem
                                 MaterialManufacturer = reader.IsDBNull(2) ? null : reader.GetString(2),
                                 MaterialPrice = reader.GetDecimal(3),
                                 MaterialContraindications = reader.IsDBNull(4) ? null : reader.GetString(4),
-                                MaterialStock = reader.GetDecimal(5)
+                                MaterialStock = reader.GetDecimal(5),
+                                // Новые поля
+                                LastIncomingDate = reader.IsDBNull(6) ? null : reader.GetDateTime(6),
+                                LastSupplier = reader.IsDBNull(7) ? null : reader.GetString(7),
+                                LastIncomingQuantity = reader.IsDBNull(8) ? null : reader.GetDecimal(8),
+                                LastIncomingPrice = reader.IsDBNull(9) ? null : reader.GetDecimal(9)
                             });
                         }
                     }
@@ -70,16 +76,14 @@ namespace LashAccountingSystem
                 string lowerSearch = searchText.ToLower();
                 _filteredMaterials = _allMaterials.Where(m =>
                     (m.MaterialName?.ToLower().Contains(lowerSearch) ?? false) ||
-                    (m.MaterialManufacturer?.ToLower().Contains(lowerSearch) ?? false)
+                    (m.MaterialManufacturer?.ToLower().Contains(lowerSearch) ?? false) ||
+                    (m.LastSupplier?.ToLower().Contains(lowerSearch) ?? false) ||
+                    (m.MaterialContraindications?.ToLower().Contains(lowerSearch) ?? false)
                 ).ToList();
             }
 
             MaterialsDataGrid.ItemsSource = _filteredMaterials;
-
-            if (SearchResultCount != null)
-            {
-                SearchResultCount.Text = $"Найдено: {_filteredMaterials.Count} из {_allMaterials.Count}";
-            }
+            SearchResultCount.Text = $"Найдено: {_filteredMaterials.Count} из {_allMaterials.Count}";
         }
 
         private void SearchTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
@@ -170,6 +174,25 @@ namespace LashAccountingSystem
             LoadMaterials(SearchTextBox?.Text ?? "");
             MessageBox.Show("Список материалов обновлён!", "Обновление",
                 MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void MaterialReportButton_Click(object sender, RoutedEventArgs e)
+        {
+            var reportWindow = new MaterialReportWindow();
+            reportWindow.Owner = this;
+            reportWindow.ShowDialog();
+        }
+
+        private void IncomingButton_Click(object sender, RoutedEventArgs e)
+        {
+            var incomingWindow = new MaterialIncomingWindow();
+            incomingWindow.Owner = this;
+            if (incomingWindow.ShowDialog() == true)
+            {
+                LoadMaterials(SearchTextBox?.Text ?? "");
+                MessageBox.Show("Остатки материалов обновлены!", "Успех",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
     }
 }
