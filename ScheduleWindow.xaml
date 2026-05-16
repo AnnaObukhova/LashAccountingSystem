@@ -45,31 +45,57 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Column="0" 
-               Text="Расписание записей" 
-               FontSize="22" 
-               FontWeight="Bold" 
-               Foreground="#3D5736"
-               VerticalAlignment="Center"/>
+                       Text="Расписание записей" 
+                       FontSize="22" 
+                       FontWeight="Bold" 
+                       Foreground="#3D5736"
+                       VerticalAlignment="Center"/>
 
             <Button x:Name="BackupButton"
-            Content="💾 Резервное копирование" Height="30"
-            Background="#3D5736" 
-            Foreground="White"
-            Click="BackupButton_Click"
-            ToolTip="Резервное копирование базы данных"
-            Margin="898,0,10,0" Grid.ColumnSpan="2"/>
+                    Grid.Column="1"
+                    Content="💾 Резервное копирование" 
+                    Width="150" Height="30"
+                    Background="#3D5736" 
+                    Foreground="White"
+                    Click="BackupButton_Click"
+                    ToolTip="Резервное копирование базы данных"
+                    Margin="0,0,10,0"/>
 
             <Button x:Name="MastersButton" 
-            Grid.Column="2"
-            Content="👥 Мастера" 
-            Width="100" Height="30"
-            Background="#8F9964" 
-            Foreground="White"
-            Click="MastersButton_Click"
-            ToolTip="Управление мастерами"/>
+                    Grid.Column="2"
+                    Content="👥 Мастера" 
+                    Width="100" Height="30"
+                    Background="#8F9964" 
+                    Foreground="White"
+                    Click="MastersButton_Click"
+                    ToolTip="Управление мастерами"
+                    Margin="0,0,10,0"/>
+
+            <!-- НОВАЯ КНОПКА ВЫХОДА -->
+            <Button x:Name="ExitButton" 
+                    Grid.Column="3"
+                    Content="🚪 Выход" 
+                    Width="80" Height="30"
+                    Background="#B35D6E" 
+                    Foreground="White"
+                    Click="ExitButton_Click"
+                    ToolTip="Выход из приложения"
+                    Margin="0,0,10,0"/>
+            
+            <Button x:Name="SettingsButton" 
+                    Grid.Column="4"
+                    Content="⚙️ Настройки" 
+                    Width="90" Height="30"
+                    Background="#3D5736" 
+                    Foreground="White"
+                    Click="SettingsButton_Click"
+                    ToolTip="Настройки приложения"
+                    Margin="0,0,10,0"/>
         </Grid>
 
         <!-- Панель навигации по датам -->
