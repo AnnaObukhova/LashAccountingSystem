@@ -39,7 +39,6 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Заголовок и кнопки управления -->
         <Grid Grid.Row="0" Margin="0,0,0,15">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -47,55 +46,71 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
+            <!-- Заголовок -->
             <TextBlock Grid.Column="0" 
-                       Text="Расписание записей" 
-                       FontSize="22" 
-                       FontWeight="Bold" 
-                       Foreground="#3D5736"
-                       VerticalAlignment="Center"/>
+               Text="📅 Расписание записей" 
+               FontSize="22" 
+               FontWeight="Bold" 
+               Foreground="#3D5736"
+               VerticalAlignment="Center"/>
 
-            <Button x:Name="BackupButton"
-                    Grid.Column="1"
-                    Content="💾 Резервное копирование" 
-                    Width="150" Height="30"
-                    Background="#3D5736" 
-                    Foreground="White"
-                    Click="BackupButton_Click"
-                    ToolTip="Резервное копирование базы данных"
-                    Margin="0,0,10,0"/>
+            <!-- Разделитель-отступ (визуально отделяет заголовок от кнопок) -->
+            <Rectangle Grid.Column="1" Width="20" Height="1" Fill="Transparent"/>
 
-            <Button x:Name="MastersButton" 
-                    Grid.Column="2"
-                    Content="👥 Мастера" 
-                    Width="100" Height="30"
-                    Background="#8F9964" 
-                    Foreground="White"
-                    Click="MastersButton_Click"
-                    ToolTip="Управление мастерами"
-                    Margin="0,0,10,0"/>
+            <!-- Группа: Управление системой -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <Button x:Name="BackupButton" 
+                Content="💾 Резервное копирование" 
+                Width="170" Height="30"
+                Background="#3D5736" 
+                Foreground="White"
+                Click="BackupButton_Click"
+                ToolTip="Создание и восстановление резервной копии"
+                Margin="0,0,5,0"/>
 
-            <!-- НОВАЯ КНОПКА ВЫХОДА -->
-            <Button x:Name="ExitButton" 
-                    Grid.Column="3"
-                    Content="🚪 Выход" 
-                    Width="80" Height="30"
-                    Background="#B35D6E" 
-                    Foreground="White"
-                    Click="ExitButton_Click"
-                    ToolTip="Выход из приложения"
-                    Margin="0,0,10,0"/>
-            
-            <Button x:Name="SettingsButton" 
-                    Grid.Column="4"
-                    Content="⚙️ Настройки" 
-                    Width="90" Height="30"
-                    Background="#3D5736" 
-                    Foreground="White"
-                    Click="SettingsButton_Click"
-                    ToolTip="Настройки приложения"
-                    Margin="0,0,10,0"/>
+                <Button x:Name="SettingsButton" 
+                Content="⚙️ Настройки" 
+                Width="100" Height="30"
+                Background="#3D5736" 
+                Foreground="White"
+                Click="SettingsButton_Click"
+                ToolTip="Настройки приложения"
+                Margin="0,0,5,0"/>
+
+                <Button x:Name="HelpButton" 
+                Content="❓ Справка" 
+                Width="90" Height="30"
+                Background="#3D5736" 
+                Foreground="White"
+                Click="HelpButton_Click"
+                ToolTip="Открыть руководство пользователя"/>
+            </StackPanel>
+
+            <!-- Разделитель-отступ -->
+            <Rectangle Grid.Column="3" Width="15" Height="1" Fill="Transparent"/>
+
+            <!-- Группа: Справочники -->
+            <StackPanel Grid.Column="4" Orientation="Horizontal">
+                <Button x:Name="MastersButton" 
+                Content="👥 Мастера" 
+                Width="90" Height="30"
+                Background="#8F9964" 
+                Foreground="White"
+                Click="MastersButton_Click"
+                ToolTip="Управление мастерами"
+                Margin="0,0,5,0"/>
+
+                <Button x:Name="ExitButton" 
+                Content="🚪 Выход" 
+                Width="70" Height="30"
+                Background="#B35D6E" 
+                Foreground="White"
+                Click="ExitButton_Click"
+                ToolTip="Выход из приложения"/>
+            </StackPanel>
         </Grid>
 
         <!-- Панель навигации по датам -->

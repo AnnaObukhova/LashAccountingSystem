@@ -5,6 +5,7 @@ using Npgsql;
 using LashAccountingSystem.Database;
 using LashAccountingSystem.Models;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace LashAccountingSystem
 {
@@ -23,6 +24,13 @@ namespace LashAccountingSystem
             try
             {
                 InitializeComponent();
+
+                this.Loaded += (s, e) =>
+                {
+                    this.CommandBindings.Add(new CommandBinding(ApplicationCommands.Help,
+                        (sender, args) => HelpButton_Click(sender, null)));
+                };
+
                 _currentFilterDate = DateTime.Today;
                 
                 FilterDatePicker.SelectedDate = _currentFilterDate;
@@ -429,6 +437,23 @@ namespace LashAccountingSystem
             var settingsWindow = new SettingsWindow();
             settingsWindow.Owner = this;
             settingsWindow.ShowDialog();
+        }
+
+        private void HelpButton_Click(object sender, RoutedEventArgs e)
+        {
+            string chmPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LashAccountingSystem.chm");
+
+            if (System.IO.File.Exists(chmPath))
+            {
+                // Открываем CHM через стандартную программу Windows
+                System.Diagnostics.Process.Start("hh.exe", chmPath);
+            }
+            else
+            {
+                MessageBox.Show("Файл справки не найден!\n\n" +
+                    "Ожидаемый путь: " + chmPath,
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
     }
 }

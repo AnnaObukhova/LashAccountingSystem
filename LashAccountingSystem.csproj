@@ -34,7 +34,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="LashAccountingSystem.chm" />
     <None Remove="Resourses\favicon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="LashAccountingSystem.chm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
