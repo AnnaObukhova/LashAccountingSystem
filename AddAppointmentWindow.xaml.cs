@@ -134,7 +134,6 @@ namespace LashAccountingSystem
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            // Проверка обязательных полей (оставляем как есть)
             if (ClientComboBox.SelectedValue == null)
             {
                 MessageBox.Show("Выберите клиента!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -180,9 +179,7 @@ namespace LashAccountingSystem
             bool paymentStatus = PaymentCheckBox.IsChecked ?? false;
             string notes = NotesTextBox.Text.Trim();
 
-            // ============================================
-            // ШАГ 1: ПРОВЕРКА НАЛИЧИЯ МАТЕРИАЛОВ
-            // ============================================
+            // Проверка наличия материалов
             List<string> missingMaterials = new List<string>();
 
             using (var conn = DbConnection.GetConnection())
@@ -221,9 +218,7 @@ namespace LashAccountingSystem
                 return;
             }
 
-            // ============================================
-            // ШАГ 2: ПОЛУЧЕНИЕ ЦЕНЫ
-            // ============================================
+            // Получение цены
             int priceHistoryId = 0;
             decimal actualPrice = price;
 
@@ -258,9 +253,7 @@ namespace LashAccountingSystem
                 }
             }
 
-            // ============================================
-            // ШАГ 3: СОЗДАНИЕ ЗАПИСИ
-            // ============================================
+            // Создание записи
             int newAppointmentId = 0;
 
             using (var conn = DbConnection.GetConnection())
@@ -287,10 +280,7 @@ namespace LashAccountingSystem
                 }
             }
 
-            // ============================================
-            // ШАГ 4: СПИСАНИЕ МАТЕРИАЛОВ
-            // ============================================
-            // Сначала получаем список материалов (отдельное подключение)
+            // Списание материалов
             List<(int materialId, decimal quantity)> materialsToConsume = new List<(int, decimal)>();
 
             using (var conn = DbConnection.GetConnection())
@@ -314,7 +304,6 @@ namespace LashAccountingSystem
                 }
             }
 
-            // Теперь списываем материалы (отдельное подключение для каждой операции)
             foreach (var material in materialsToConsume)
             {
                 using (var conn = DbConnection.GetConnection())

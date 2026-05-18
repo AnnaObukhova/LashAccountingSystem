@@ -47,7 +47,6 @@ namespace LashAccountingSystem
             int materialId = (int)MaterialComboBox.SelectedValue;
             string materialName = MaterialComboBox.Text;
 
-            // Проверка, не добавлен ли уже этот материал
             foreach (var existing in _existingMaterials)
             {
                 if (existing.MaterialId == materialId)

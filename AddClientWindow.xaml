@@ -10,7 +10,6 @@
         ResizeMode="NoResize">
 
     <Window.Resources>
-        <!-- Стиль для всех кнопок с закруглёнными углами -->
         <Style TargetType="Button">
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>

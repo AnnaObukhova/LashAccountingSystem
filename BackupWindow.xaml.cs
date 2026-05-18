@@ -64,9 +64,7 @@ namespace LashAccountingSystem
             return $"{bytes / (1024.0 * 1024.0):F1} MB";
         }
 
-        /// <summary>
-        /// Создание резервной копии с показом окна
-        /// </summary>
+        // Создание резервной копии с показом окна
         private void CreateBackupButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -87,9 +85,7 @@ namespace LashAccountingSystem
             }
         }
 
-        /// <summary>
-        /// Создание резервной копии без показа окна (для авто-бэкапа)
-        /// </summary>
+        // Создание резервной копии без показа окна (для авто-бэкапа)
         public void CreateBackupSilent(string filePath)
         {
             try
@@ -102,9 +98,7 @@ namespace LashAccountingSystem
             }
         }
 
-        /// <summary>
-        /// Внутренний метод создания резервной копии
-        /// </summary>
+        // Внутренний метод создания резервной копии
         private void CreateBackupInternal(string filePath)
         {
             var sb = new StringBuilder();
@@ -131,9 +125,7 @@ namespace LashAccountingSystem
             File.WriteAllText(filePath, sb.ToString(), Encoding.UTF8);
         }
 
-        /// <summary>
-        /// Экспорт одной таблицы в SQL
-        /// </summary>
+        // Экспорт одной таблицы в SQL
         private void ExportTable(NpgsqlConnection conn, string tableName, StringBuilder sb)
         {
             try
@@ -187,9 +179,104 @@ namespace LashAccountingSystem
             return $"'{value.ToString().Replace("'", "''")}'";
         }
 
+        // Восстановление базы данных из SQL-дампа
         private void RestoreButton_Click(object sender, RoutedEventArgs e)
         {
-            // ... ваш существующий код восстановления ...
+            // Проверка: выбран ли файл для восстановления
+            if (BackupsListBox.SelectedIndex == -1 || BackupsListBox.SelectedItem.ToString() == "Нет сохранённых копий")
+            {
+                MessageBox.Show("Выберите резервную копию!", "Внимание",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Получаем путь к выбранному файлу
+            string selected = BackupsListBox.SelectedItem.ToString();
+            string fileName = ExtractFileNameFromDisplay(selected);
+            string filePath = Path.Combine(BackupFolderPath, fileName);
+
+            // Запрашиваем подтверждение у пользователя
+            var result = MessageBox.Show($"⚠️ Восстановление УДАЛИТ все текущие данные!\n\nПродолжить?",
+                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (result != MessageBoxResult.Yes) return;
+
+            try
+            {
+                string sqlContent = File.ReadAllText(filePath, Encoding.UTF8);   // Читаем SQL-дамп
+
+                using (var conn = DbConnection.GetConnection())
+                {
+                    conn.Open();
+
+                    using (var transaction = conn.BeginTransaction())
+                    {
+                        try
+                        {
+                            // Отключаем проверку внешних ключей для безопасного удаления
+                            using (var cmd = new NpgsqlCommand("SET session_replication_role = 'replica';", conn, transaction))
+                            {
+                                cmd.ExecuteNonQuery();
+                            }
+
+                            // Очищаем таблицы в правильном порядке (сначала зависимые, потом главные)
+                            string[] tables = { "materials_consumption", "appointments", "service_materials",
+                                       "price_history", "users", "materials", "services", "masters", "clients" };
+
+                            foreach (var table in tables)
+                            {
+                                using (var cmd = new NpgsqlCommand($"TRUNCATE TABLE {table} RESTART IDENTITY CASCADE;", conn, transaction))
+                                {
+                                    cmd.ExecuteNonQuery();
+                                }
+                            }
+
+                            // Выполняем INSERT-запросы из дампа
+                            string[] lines = sqlContent.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+                            foreach (string line in lines)
+                            {
+                                string trimmed = line.Trim();
+                                if (string.IsNullOrWhiteSpace(trimmed)) continue;
+                                if (trimmed.StartsWith("--")) continue;           // Пропускаем комментарии
+
+                                if (trimmed.StartsWith("INSERT INTO"))           // Только INSERT-запросы
+                                {
+                                    using (var cmd = new NpgsqlCommand(trimmed, conn, transaction))
+                                    {
+                                        cmd.ExecuteNonQuery();
+                                    }
+                                }
+                            }
+
+                            // Включаем обратно проверку внешних ключей
+                            using (var cmd = new NpgsqlCommand("SET session_replication_role = 'origin';", conn, transaction))
+                            {
+                                cmd.ExecuteNonQuery();
+                            }
+
+                            transaction.Commit();                                 // Фиксируем изменения
+                        }
+                        catch (Exception ex)
+                        {
+                            transaction.Rollback();                               // Откат при ошибке
+                            throw;
+                        }
+                    }
+                }
+
+                MessageBox.Show("✅ База данных восстановлена!\n\nПриложение будет перезапущено.",
+                    "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // Перезапуск приложения
+                System.Diagnostics.Process.Start(Application.ResourceAssembly.Location);
+                Application.Current.Shutdown();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка восстановления: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private string ExtractFileNameFromDisplay(string displayText)

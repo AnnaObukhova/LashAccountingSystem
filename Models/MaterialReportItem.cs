@@ -9,8 +9,6 @@
         public decimal Price { get; set; }
         public decimal TotalCost { get; set; }
         public int AppointmentCount { get; set; }
-
-        // Новые поля
         public DateTime? LastIncomingDate { get; set; }
         public string LastSupplier { get; set; }
         public decimal? LastIncomingPrice { get; set; }

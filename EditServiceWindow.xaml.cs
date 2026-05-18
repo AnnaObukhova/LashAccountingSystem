@@ -156,7 +156,7 @@ namespace LashAccountingSystem
                     {
                         try
                         {
-                            // 1. Обновляем基本信息 услуги
+                            // 1. Обновляем услуги
                             string updateServiceSql = @"UPDATE services SET 
                                                           service_name = @name,
                                                           service_description = @description,

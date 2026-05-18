@@ -12,8 +12,7 @@ namespace LashAccountingSystem
 
         public RegisterWindow()
         {
-            InitializeComponent();
-            // НЕ УСТАНАВЛИВАТЬ Owner!
+            InitializeComponent();           
         }
 
         private void RegisterButton_Click(object sender, RoutedEventArgs e)
@@ -88,7 +87,6 @@ namespace LashAccountingSystem
 
                 IsRegistrationComplete = true;
 
-                // ВАЖНО: Закрываем окно с результатом true
                 DialogResult = true;
                 Close();
             }
@@ -100,7 +98,6 @@ namespace LashAccountingSystem
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-            // ВАЖНО: Закрываем окно с результатом false
             DialogResult = false;
             Close();
         }

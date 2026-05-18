@@ -86,7 +86,6 @@ namespace LashAccountingSystem
 
         private void UpdateMaterialsRequiredHint()
         {
-            // Можно добавить визуальный индикатор, что материалы обязательны
             if (MaterialsDataGrid.ItemsSource != null && MaterialsDataGrid.Items.Count == 0)
             {
                 MaterialsBorder.BorderBrush = System.Windows.Media.Brushes.Red;
@@ -101,7 +100,6 @@ namespace LashAccountingSystem
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            // Проверка обязательных полей
             if (string.IsNullOrWhiteSpace(NameTextBox.Text))
             {
                 MessageBox.Show("Введите название услуги!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -123,7 +121,7 @@ namespace LashAccountingSystem
                 return;
             }
 
-            // ========== НОВАЯ ПРОВЕРКА: обязательное наличие материалов ==========
+            // Обязательное наличие материалов
             if (_tempMaterials == null || _tempMaterials.Count == 0)
             {
                 MessageBox.Show("❌ Добавьте хотя бы один материал для услуги!\n\n" +

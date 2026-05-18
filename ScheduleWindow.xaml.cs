@@ -32,10 +32,10 @@ namespace LashAccountingSystem
                 };
 
                 _currentFilterDate = DateTime.Today;
-                
+
                 FilterDatePicker.SelectedDate = _currentFilterDate;
-                
-                LoadAppointments();                
+
+                LoadAppointments();
             }
             catch (Exception ex)
             {
@@ -124,10 +124,11 @@ namespace LashAccountingSystem
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка загрузки записей: {ex.Message}", "Ошибка",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Ошибка загрузки записей: {ex.Message}", "Ошибка",
+                //    MessageBoxButton.OK, MessageBoxImage.Error);
+                //MyDataGrid.ItemsSource = new List<Appointment>();
             }
-        }        
+        }
 
         private void TodayButton_Click(object sender, RoutedEventArgs e)
         {
@@ -189,10 +190,7 @@ namespace LashAccountingSystem
                         using (var conn = DbConnection.GetConnection())
                         {
                             conn.Open();
-
-                            // ============================================
-                            // ШАГ 1: ПОЛУЧАЕМ СПИСАННЫЕ МАТЕРИАЛЫ ДЛЯ ЭТОЙ ЗАПИСИ
-                            // ============================================
+                            
                             string getMaterialsSql = @"
                         SELECT material_id, material_consumption_amount
                         FROM materials_consumption
@@ -215,9 +213,6 @@ namespace LashAccountingSystem
                                 }
                             }
 
-                            // ============================================
-                            // ШАГ 2: УДАЛЯЕМ ЗАПИСЬ О РАСХОДЕ МАТЕРИАЛОВ
-                            // ============================================
                             string deleteConsumptionSql = "DELETE FROM materials_consumption WHERE appointment_id = @appointmentId";
                             using (var cmdDel = new NpgsqlCommand(deleteConsumptionSql, conn))
                             {
@@ -225,9 +220,6 @@ namespace LashAccountingSystem
                                 cmdDel.ExecuteNonQuery();
                             }
 
-                            // ============================================
-                            // ШАГ 3: ВОЗВРАЩАЕМ МАТЕРИАЛЫ НА СКЛАД
-                            // ============================================
                             foreach (var material in materialsToReturn)
                             {
                                 string updateStockSql = "UPDATE materials SET material_stock = material_stock + @amount WHERE material_id = @materialId";
@@ -239,9 +231,6 @@ namespace LashAccountingSystem
                                 }
                             }
 
-                            // ============================================
-                            // ШАГ 4: УДАЛЯЕМ САМУ ЗАПИСЬ
-                            // ============================================
                             string deleteAppointmentSql = "DELETE FROM appointments WHERE appointment_id = @id";
                             using (var cmdDel = new NpgsqlCommand(deleteAppointmentSql, conn))
                             {
@@ -264,7 +253,7 @@ namespace LashAccountingSystem
             else
             {
                 MessageBox.Show("Выберите запись для удаления", "Внимание",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBoxButton.OK, MessageBoxImage.Warning);               
             }
         }
 

@@ -9,8 +9,6 @@
         public string MasterPhoneNumber { get; set; }
         public string MasterSpecialization { get; set; }
         public string MasterContractNumber { get; set; }
-
-        // Для отображения в комбобоксе
         public string FullName => $"{MasterSurname} {MasterName}";
     }
 }

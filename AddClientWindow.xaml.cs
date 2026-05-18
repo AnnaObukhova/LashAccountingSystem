@@ -15,7 +15,6 @@ namespace LashAccountingSystem
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            // Проверка обязательных полей
             if (string.IsNullOrWhiteSpace(SurnameTextBox.Text))
             {
                 MessageBox.Show("Введите фамилию клиента!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -76,7 +75,6 @@ namespace LashAccountingSystem
                     }
                 }
 
-                // Успех — закрываем окно и возвращаем true
                 DialogResult = true;
                 Close();
             }

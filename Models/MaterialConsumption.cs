@@ -13,7 +13,6 @@ namespace LashAccountingSystem.Models
         public int MaterialId { get; set; }
         public string MaterialName { get; set; }
         public decimal MaterialConsumptionAmount { get; set; }
-
         public string DateTimeDisplay => $"{AppointmentDate:dd.MM.yyyy} {AppointmentTime:hh\\:mm}";
     }
 }

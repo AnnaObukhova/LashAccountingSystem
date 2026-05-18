@@ -24,7 +24,6 @@ namespace LashAccountingSystem
             LoadMasters();
             LoadAppointmentData();
 
-            // Добавляем обработчик для создания нового клиента
             ClientComboBox.LostFocus += ClientComboBox_LostFocus;
         }
 
@@ -299,10 +298,7 @@ namespace LashAccountingSystem
             decimal price = decimal.Parse(PriceTextBox.Text);
             string notes = NotesTextBox.Text.Trim();
 
-            // ============================================
-            // ПРОВЕРКА НАЛИЧИЯ МАТЕРИАЛОВ (только если статус меняется на "Запланирована")
-            // ============================================
-            // Если статус меняется на "Запланирована" или это новая запись, проверяем материалы
+            // Проверка наличия материалов (только если статус меняется на "Запланирована")
             if (status == "Запланирована")
             {
                 using (var conn = DbConnection.GetConnection())

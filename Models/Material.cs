@@ -10,8 +10,6 @@ namespace LashAccountingSystem.Models
         public decimal MaterialPrice { get; set; }
         public string MaterialContraindications { get; set; }
         public decimal MaterialStock { get; set; }
-
-        // Новые поля для истории прихода
         public DateTime? LastIncomingDate { get; set; }
         public string LastSupplier { get; set; }
         public decimal? LastIncomingQuantity { get; set; }

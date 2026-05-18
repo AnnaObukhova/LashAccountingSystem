@@ -15,7 +15,6 @@ namespace LashAccountingSystem
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            // Проверка обязательных полей
             if (string.IsNullOrWhiteSpace(NameTextBox.Text))
             {
                 MessageBox.Show("Введите наименование материала!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);

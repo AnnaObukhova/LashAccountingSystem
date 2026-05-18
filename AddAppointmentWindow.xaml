@@ -11,7 +11,6 @@
         ResizeMode="NoResize">
 
     <Window.Resources>
-        <!-- Стиль для всех кнопок с закруглёнными углами -->
         <Style TargetType="Button">
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -30,7 +29,6 @@
             </Setter>
         </Style>
 
-        <!-- Стиль для TextBox -->
         <Style TargetType="TextBox">
             <Setter Property="BorderBrush" Value="#D2D5AB"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -40,7 +38,6 @@
             <Setter Property="Margin" Value="5"/>
         </Style>
 
-        <!-- Стиль для ComboBox -->
         <Style TargetType="ComboBox">
             <Setter Property="BorderBrush" Value="#D2D5AB"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -51,7 +48,6 @@
             <Setter Property="Height" Value="35"/>
         </Style>
 
-        <!-- Стиль для DatePicker -->
         <Style TargetType="DatePicker">
             <Setter Property="BorderBrush" Value="#D2D5AB"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -61,7 +57,6 @@
             <Setter Property="Height" Value="35"/>
         </Style>
 
-        <!-- Стиль для ReadOnly TextBox -->
         <Style TargetType="TextBox" x:Key="ReadOnlyTextBox" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="Background" Value="#FDF0F4"/>
             <Setter Property="IsReadOnly" Value="True"/>

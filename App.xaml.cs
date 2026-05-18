@@ -40,9 +40,7 @@ namespace LashAccountingSystem
 
                 if (result == true && loginWindow.IsLoggedIn)
                 {
-                    // ============================================
-                    // ПРОВЕРКА ЦЕЛОСТНОСТИ БАЗЫ ДАННЫХ
-                    // ============================================
+                    // Проверка целостности базы данных
                     if (!CheckDatabaseIntegrity())
                     {
                         var restoreResult = MessageBox.Show(
@@ -65,9 +63,7 @@ namespace LashAccountingSystem
                         }
                     }
 
-                    // ============================================
-                    // АВТОМАТИЧЕСКОЕ СОЗДАНИЕ РЕЗЕРВНОЙ КОПИИ (РАЗ В СУТКИ)
-                    // ============================================
+                    // Атоматическое создание резервной копии
                     CreateAutoBackupIfNeeded();
 
                     var mainWindow = new ScheduleWindow();
@@ -87,9 +83,7 @@ namespace LashAccountingSystem
             }
         }
 
-        /// <summary>
-        /// Проверка целостности базы данных
-        /// </summary>
+        // Проверка целостности базы данных
         private bool CheckDatabaseIntegrity()
         {
             try
@@ -97,7 +91,6 @@ namespace LashAccountingSystem
                 using (var conn = DbConnection.GetConnection())
                 {
                     conn.Open();
-                    // Простая проверка: выполнить запрос
                     string sql = "SELECT 1";
                     using (var cmd = new NpgsqlCommand(sql, conn))
                     {
@@ -114,9 +107,7 @@ namespace LashAccountingSystem
             }
         }
 
-        /// <summary>
-        /// Автоматическое создание резервной копии (раз в сутки)
-        /// </summary>
+        // Автоматическое создание резервной копии (раз в сутки)
         private void CreateAutoBackupIfNeeded()
         {
             try
@@ -149,7 +140,6 @@ namespace LashAccountingSystem
             }
             catch (Exception ex)
             {
-                // Не показываем ошибку пользователю, только в лог
                 System.Diagnostics.Debug.WriteLine($"Ошибка авто-бэкапа: {ex.Message}");
             }
         }
@@ -165,7 +155,7 @@ namespace LashAccountingSystem
         {
             MessageBox.Show($"Ошибка: {e.Exception.Message}\n{e.Exception.StackTrace}",
                 "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            e.Handled = true; // Чтобы приложение не закрывалось
+            e.Handled = true;
         }
 
         private bool HasUsers()
