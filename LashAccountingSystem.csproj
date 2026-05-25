@@ -36,10 +36,11 @@
   <ItemGroup>
     <None Remove="LashAccountingSystem.chm" />
     <None Remove="Resourses\favicon.ico" />
+    <None Remove="Руководство пользователя LashAccountingSystem %282.0%29.chm" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="LashAccountingSystem.chm">
+    <Content Include="Руководство пользователя LashAccountingSystem (2.0).chm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

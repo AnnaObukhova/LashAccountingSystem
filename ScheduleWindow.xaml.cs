@@ -430,7 +430,7 @@ namespace LashAccountingSystem
 
         private void HelpButton_Click(object sender, RoutedEventArgs e)
         {
-            string chmPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LashAccountingSystem.chm");
+            string chmPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Руководство пользователя LashAccountingSystem (2.0).chm");
 
             if (System.IO.File.Exists(chmPath))
             {
@@ -442,6 +442,54 @@ namespace LashAccountingSystem
                 MessageBox.Show("Файл справки не найден!\n\n" +
                     "Ожидаемый путь: " + chmPath,
                     "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void MarkAsPaidButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (MyDataGrid.SelectedItem is Appointment selectedAppointment)
+            {
+                // Проверяем, не оплачена ли уже
+                if (selectedAppointment.PaymentStatus)
+                {
+                    MessageBox.Show("Эта запись уже оплачена!", "Внимание",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                var result = MessageBox.Show($"Отметить запись клиента {selectedAppointment.ClientName} как оплаченную?",
+                    "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        using (var conn = DbConnection.GetConnection())
+                        {
+                            conn.Open();
+                            string sql = "UPDATE appointments SET payment_status = true WHERE appointment_id = @id";
+                            using (var cmd = new NpgsqlCommand(sql, conn))
+                            {
+                                cmd.Parameters.AddWithValue("@id", selectedAppointment.AppointmentId);
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+
+                        LoadAppointments();
+                        MessageBox.Show("Запись отмечена как оплаченная!", "Успех",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ошибка при отметке оплаты: {ex.Message}", "Ошибка",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Выберите запись для отметки оплаты", "Внимание",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
     }

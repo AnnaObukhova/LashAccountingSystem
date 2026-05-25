@@ -48,7 +48,7 @@
 
         <!-- Заголовок -->
         <TextBlock Grid.Row="0" 
-                   Text="👥 Управление мастерами" 
+                   Text="Управление мастерами" 
                    FontSize="22" 
                    FontWeight="Bold" 
                    Foreground="#3D5736"

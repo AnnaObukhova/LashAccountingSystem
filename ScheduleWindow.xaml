@@ -63,8 +63,8 @@
             <!-- Группа: Управление системой -->
             <StackPanel Grid.Column="2" Orientation="Horizontal">
                 <Button x:Name="BackupButton" 
-                Content="💾 Резервное копирование" 
-                Width="170" Height="30"
+                Content="💾" 
+                Width="30" Height="30"
                 Background="#3D5736" 
                 Foreground="White"
                 Click="BackupButton_Click"
@@ -72,8 +72,8 @@
                 Margin="0,0,5,0"/>
 
                 <Button x:Name="SettingsButton" 
-                Content="⚙️ Настройки" 
-                Width="100" Height="30"
+                Content="⚙️" 
+                Width="30" Height="30"
                 Background="#3D5736" 
                 Foreground="White"
                 Click="SettingsButton_Click"
@@ -81,8 +81,8 @@
                 Margin="0,0,5,0"/>
 
                 <Button x:Name="HelpButton" 
-                Content="❓ Справка" 
-                Width="90" Height="30"
+                Content="❓" 
+                Width="30" Height="30"
                 Background="#3D5736" 
                 Foreground="White"
                 Click="HelpButton_Click"
@@ -93,19 +93,10 @@
             <Rectangle Grid.Column="3" Width="15" Height="1" Fill="Transparent"/>
 
             <!-- Группа: Справочники -->
-            <StackPanel Grid.Column="4" Orientation="Horizontal">
-                <Button x:Name="MastersButton" 
-                Content="👥 Мастера" 
-                Width="90" Height="30"
-                Background="#8F9964" 
-                Foreground="White"
-                Click="MastersButton_Click"
-                ToolTip="Управление мастерами"
-                Margin="0,0,5,0"/>
-
+            <StackPanel Grid.Column="4" Orientation="Horizontal">              
                 <Button x:Name="ExitButton" 
                 Content="🚪 Выход" 
-                Width="70" Height="30"
+                Width="80" Height="30"
                 Background="#B35D6E" 
                 Foreground="White"
                 Click="ExitButton_Click"
@@ -134,16 +125,18 @@
                         Click="PrevDayButton_Click"
                         ToolTip="Предыдущий день"/>
 
-                <!-- Текущая дата -->
-                <TextBlock x:Name="CurrentDateText" 
-                           Text="{Binding SelectedDate, ElementName=FilterDatePicker, StringFormat=dd.MM.yyyy}" 
-                           FontSize="18" 
-                           FontWeight="Bold" 
-                           Foreground="#B35D6E"
-                           VerticalAlignment="Center"
-                           MinWidth="120"
-                           TextAlignment="Center"/>
-
+                <!-- Выбор даты через календарь -->
+                <DatePicker x:Name="FilterDatePicker" 
+                            SelectedDate="{x:Static sys:DateTime.Today}"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            Width="120"
+                            Height="40"
+                            FontSize="16"
+                            SelectedDateChanged="FilterDatePicker_SelectedDateChanged"
+                            VerticalContentAlignment="Center"
+                            HorizontalContentAlignment="Center"/>
+                
                 <!-- Кнопка "Вперед" (завтра) -->
                 <Button x:Name="NextDayButton" 
                         Content="▶" 
@@ -154,57 +147,58 @@
                         Click="NextDayButton_Click"
                         ToolTip="Следующий день"/>
 
-                <Rectangle Width="1" Height="30" Fill="#D7DAB3" Margin="15,0"/>
-
-                <!-- Выбор даты через календарь -->
-                <TextBlock Text="Дата:" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,0,10,0" 
-                           FontWeight="Bold" Foreground="#3D5736" FontSize="16"/>
-
-                <DatePicker x:Name="FilterDatePicker" 
-                            SelectedDate="{x:Static sys:DateTime.Today}"
-                            VerticalAlignment="Center"
-                            HorizontalAlignment="Center"
-                            Width="120"
-                            Height="40"
-                            FontSize="18"
-                            SelectedDateChanged="FilterDatePicker_SelectedDateChanged" 
-                            VerticalContentAlignment="Center" 
-                            HorizontalContentAlignment="Center" 
-                            Margin="0,0,0,5"/>
+                <Rectangle Width="1" Height="30" Fill="#D7DAB3" Margin="10,0"/>
 
                 <Button x:Name="TodayButton" Content="Сегодня" Width="80" Height="30" 
-                        Margin="10,0,0,0" Background="#B35D6E" Foreground="White" 
-                        Click="TodayButton_Click"/>
+            Background="#B35D6E" Foreground="White" 
+            Click="TodayButton_Click"/>
             </StackPanel>
         </Border>
 
         <!-- Кнопки управления -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,10">
-            <Button x:Name="AddButton" Content="➕ Новая запись" Width="130" Height="35" 
-                    Margin="0,0,10,0" Background="#3D5736" Foreground="White" 
-                    Click="AddButton_Click"/>
-            <Button x:Name="EditButton" Content="✏️ Редактировать" Width="120" Height="35" 
-                    Margin="0,0,10,0" Background="#8F9964" Foreground="White"
-                    Click="EditButton_Click"/>
-            <Button x:Name="DeleteButton" Content="Удалить" Width="100" Height="35" 
-                    Margin="0,0,10,0" Background="#B35D6E" Foreground="White" 
-                    Click="DeleteButton_Click"/>
-            <Button x:Name="CompleteButton" Content="✓ Отметить выполненной" Width="160" Height="35" 
-                    Margin="0,0,10,0" Background="#F5D1D8" Foreground="Black" 
-                    Click="CompleteButton_Click"/>
+        <Grid Grid.Row="2" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-            <Rectangle Width="2" Height="30" Fill="#D7DAB3" Margin="10,0"/>
+            <!-- Левая группа кнопок -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
+                <Button x:Name="AddButton" Content="➕ Новая запись" Width="130" Height="35" 
+                Margin="0,0,10,0" Background="#3D5736" Foreground="White" 
+                Click="AddButton_Click"/>
+                <Button x:Name="EditButton" Content="✏️ Редактировать" Width="120" Height="35" 
+                Margin="0,0,10,0" Background="#8F9964" Foreground="White"
+                Click="EditButton_Click"/>
+                <Button x:Name="DeleteButton" Content="🗑 Удалить" Width="100" Height="35" 
+                Margin="0,0,10,0" Background="#B35D6E" Foreground="White" 
+                Click="DeleteButton_Click"/>
+                <Button x:Name="CompleteButton" Content="✓ Отметить выполненной" Width="160" Height="35" 
+                Margin="0,0,10,0" Background="#F5D1D8" Foreground="Black" 
+                Click="CompleteButton_Click"/>
+                <Button x:Name="MarkAsPaidButton" Content="💰 Отметить оплаченной" Width="160" Height="35" 
+                Margin="0,0,10,0" Background="#3D5736" Foreground="White" 
+                Click="MarkAsPaidButton_Click"/>
+                <Rectangle Width="2" Height="30" Fill="#D7DAB3" Margin="10,0"/>
 
-            <Button x:Name="ClientsButton" Content="Клиенты" Width="100" Height="35" 
-                    Margin="0,0,10,0" Background="#8F9964" Foreground="White" 
-                    Click="ClientsButton_Click"/>
-            <Button x:Name="ServicesButton" Content="Услуги" Width="100" Height="35" 
-                    Margin="0,0,10,0" Background="#8F9964" Foreground="White" 
-                    Click="ServicesButton_Click"/>
-            <Button x:Name="MaterialsButton" Content="Материалы" Width="110" Height="35" 
-                    Background="#8F9964" Foreground="White" 
-                    Click="MaterialsButton_Click"/>
-        </StackPanel>
+            </StackPanel>
+
+            <!-- Правая группа кнопок -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button x:Name="ClientsButton" Content="Клиенты" Width="100" Height="35" 
+                Margin="0,0,10,0" Background="#8F9964" Foreground="White" 
+                Click="ClientsButton_Click"/>
+                <Button x:Name="ServicesButton" Content="Услуги" Width="100" Height="35" 
+                Margin="0,0,10,0" Background="#8F9964" Foreground="White" 
+                Click="ServicesButton_Click"/>
+                <Button x:Name="MaterialsButton" Content="Материалы" Width="100" Height="35" 
+                Margin="0,0,10,0" Background="#8F9964" Foreground="White" 
+                Click="MaterialsButton_Click"/>
+                <Button x:Name="MastersButton" Content="Мастера" Width="100" Height="35" 
+                Background="#8F9964" Foreground="White" 
+                Click="MastersButton_Click"/>
+            </StackPanel>
+        </Grid>
 
         <!-- DataGrid с порядковым номером вместо ID -->
         <Border Grid.Row="3" BorderBrush="#D2D5AB" BorderThickness="1" Background="White">
