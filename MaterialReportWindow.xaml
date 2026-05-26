@@ -2,8 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
-        Title="📊 Отчёт по расходу материалов" 
-        Height="550" Width="850"
+        Title="📊 Отчёт по движению материалов" 
+        Height="550" Width="900"
         Background="White"
         FontFamily="Segoe UI"
         Foreground="#3D5736"
@@ -34,11 +34,16 @@
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Margin" Value="5"/>
         </Style>
+
+        <Style TargetType="TabItem">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="15,5"/>
+        </Style>
     </Window.Resources>
 
     <Grid Margin="10">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -46,7 +51,7 @@
 
         <!-- Заголовок -->
         <TextBlock Grid.Row="0" 
-                   Text="📊 Отчёт по расходу материалов" 
+                   Text="📊 Отчёт по движению материалов" 
                    FontSize="22" 
                    FontWeight="Bold" 
                    Foreground="#3D5736"
@@ -87,6 +92,7 @@
                         Background="#8F9964" 
                         Foreground="White"
                         Click="ExportCsvButton_Click"/>
+
                 <Button x:Name="ExportPdfButton" 
                         Content="📄 Экспорт в PDF" 
                         Width="120" 
@@ -97,66 +103,82 @@
             </StackPanel>
         </Border>
 
-        <!-- Итоговая информация -->
-        <Border Grid.Row="2" 
-                Background="#E8F5E9" 
-                CornerRadius="8" 
-                Padding="10" 
-                Margin="0,0,0,10"
-                BorderBrush="#A5D6A7"
-                BorderThickness="1">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <TextBlock x:Name="TotalMaterialsCount" 
-                           Text="📦 Всего материалов: 0" 
-                           Margin="20,0" 
-                           FontWeight="SemiBold"/>
-                <TextBlock x:Name="TotalQuantity" 
-                           Text="🔢 Общий расход: 0 ед." 
-                           Margin="20,0" 
-                           FontWeight="SemiBold"/>
-                <TextBlock x:Name="TotalCost" 
-                           Text="💰 Общая стоимость: 0 руб." 
-                           Margin="20,0" 
-                           FontWeight="SemiBold"
-                           Foreground="#B35D6E"/>
-            </StackPanel>
-        </Border>
+        <!-- Три вкладки -->
+        <TabControl Grid.Row="2">
 
-        <!-- Таблица расхода материалов -->
-        <Border Grid.Row="3" BorderBrush="#D2D5AB" BorderThickness="1" Background="White">
-            <DataGrid x:Name="ReportDataGrid" 
-                      AutoGenerateColumns="False"
-                      IsReadOnly="True"
-                      SelectionMode="Single"
-                      SelectionUnit="FullRow"
-                      AlternatingRowBackground="#D2D5AB"
-                      RowBackground="White"
-                      FontSize="13"
-                      BorderBrush="Transparent"
-                      BorderThickness="0"
-                      GridLinesVisibility="Horizontal"
-                      HeadersVisibility="Column"
-                      CanUserAddRows="False"
-                      CanUserDeleteRows="False"
-                      CanUserResizeRows="False"
-                      VerticalScrollBarVisibility="Auto">
+            <!-- Вкладка 1: Приход -->
+            <TabItem Header="📦 Приход материалов">
+                <DataGrid x:Name="IncomingDataGrid" 
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          AlternatingRowBackground="#D2D5AB"
+                          RowBackground="White"
+                          FontSize="13"
+                          BorderBrush="Transparent"
+                          GridLinesVisibility="Horizontal"
+                          HeadersVisibility="Column"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          VerticalScrollBarVisibility="Auto">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Материал" Binding="{Binding MaterialName}" Width="200"/>
+                        <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer}" Width="150"/>
+                        <DataGridTextColumn Header="Цена покупки" Binding="{Binding Price, StringFormat={}{0:F2}}" Width="120"/>
+                        <DataGridTextColumn Header="Количество" Binding="{Binding Quantity, StringFormat={}{0:F2}}" Width="100"/>
+                        <DataGridTextColumn Header="Общая стоимость" Binding="{Binding Total, StringFormat={}{0:F2}}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
 
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Материал" Binding="{Binding MaterialName}" Width="180"/>
-                    <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer}" Width="120"/>
-                    <DataGridTextColumn Header="Расход (ед.)" Binding="{Binding TotalQuantity}" Width="100"/>
-                    <DataGridTextColumn Header="Цена продажи" Binding="{Binding Price, StringFormat={}{0:F2}}" Width="90"/>
+            <!-- Вкладка 2: Расход -->
+            <TabItem Header="💰 Расход материалов">
+                <DataGrid x:Name="OutgoingDataGrid" 
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          AlternatingRowBackground="#D2D5AB"
+                          RowBackground="White"
+                          FontSize="13"
+                          BorderBrush="Transparent"
+                          GridLinesVisibility="Horizontal"
+                          HeadersVisibility="Column"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          VerticalScrollBarVisibility="Auto">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Материал" Binding="{Binding MaterialName}" Width="200"/>
+                        <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer}" Width="150"/>
+                        <DataGridTextColumn Header="Цена продажи" Binding="{Binding Price, StringFormat={}{0:F2}}" Width="120"/>
+                        <DataGridTextColumn Header="Количество" Binding="{Binding Quantity, StringFormat={}{0:F2}}" Width="100"/>
+                        <DataGridTextColumn Header="Общая стоимость" Binding="{Binding Total, StringFormat={}{0:F2}}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
 
-                    <!-- НОВЫЕ КОЛОНКИ -->
-                    <DataGridTextColumn Header="Последний приход" Binding="{Binding LastIncomingDate, StringFormat={}{0:dd.MM.yyyy}}" Width="100"/>
-                    <DataGridTextColumn Header="Поставщик" Binding="{Binding LastSupplier}" Width="120"/>
-                    <DataGridTextColumn Header="Цена закупки" Binding="{Binding LastIncomingPrice, StringFormat={}{0:F2}}" Width="90"/>
-                    <DataGridTextColumn Header="Складской остаток" Binding="{Binding CurrentStock, StringFormat={}{0:F2}}" Width="100"/>
-
-                    <DataGridTextColumn Header="Общая стоимость (руб)" Binding="{Binding TotalCost, StringFormat={}{0:F2}}" Width="120"/>
-                    <DataGridTextColumn Header="Кол-во записей" Binding="{Binding AppointmentCount}" Width="100"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Border>
+            <!-- Вкладка 3: Сводка -->
+            <TabItem Header="📊 Сводная ведомость">
+                <DataGrid x:Name="SummaryDataGrid" 
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          AlternatingRowBackground="#D2D5AB"
+                          RowBackground="White"
+                          FontSize="13"
+                          BorderBrush="Transparent"
+                          GridLinesVisibility="Horizontal"
+                          HeadersVisibility="Column"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          VerticalScrollBarVisibility="Auto">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Материал" Binding="{Binding MaterialName}" Width="200"/>
+                        <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer}" Width="150"/>
+                        <DataGridTextColumn Header="Приход" Binding="{Binding Incoming, StringFormat={}{0:F2}}" Width="100"/>
+                        <DataGridTextColumn Header="Расход" Binding="{Binding Outgoing, StringFormat={}{0:F2}}" Width="100"/>
+                        <DataGridTextColumn Header="Остаток" Binding="{Binding Stock, StringFormat={}{0:F2}}" Width="100"/>
+                        <DataGridTextColumn Header="Ср. цена закупки" Binding="{Binding AvgPrice, StringFormat={}{0:F2}}" Width="120"/>
+                        <DataGridTextColumn Header="Стоимость остатка" Binding="{Binding StockValue, StringFormat={}{0:F2}}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>
